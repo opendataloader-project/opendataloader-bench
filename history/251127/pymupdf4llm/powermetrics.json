@@ -1,0 +1,12 @@
+{
+    "avg_cpu_power_mw": 5704.29,
+    "avg_gpu_power_mw": 15.71,
+    "avg_ane_power_mw": 0.0,
+    "avg_combined_power_mw": 5719.81,
+    "total_cpu_energy_j": 120.493,
+    "total_gpu_energy_j": 0.332,
+    "total_ane_energy_j": 0.0,
+    "total_combined_energy_j": 120.821,
+    "power_sample_count": 21,
+    "total_elapsed_seconds": 21.123
+}

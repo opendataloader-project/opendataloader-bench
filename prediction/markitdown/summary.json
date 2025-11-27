@@ -1,0 +1,9 @@
+{
+    "engine_name": "markitdown",
+    "engine_version": "0.1.3",
+    "processor": "Apple M4",
+    "document_count": 200,
+    "total_elapsed": 8.240632057189941,
+    "elapsed_per_doc": 0.041203160285949704,
+    "date": "2025-11-27"
+}

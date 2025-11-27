@@ -1,0 +1,9 @@
+{
+    "engine_name": "pymupdf4llm",
+    "engine_version": "0.2.0",
+    "processor": "Apple M4",
+    "document_count": 200,
+    "total_elapsed": 18.172855138778687,
+    "elapsed_per_doc": 0.09086427569389344,
+    "date": "2025-11-27"
+}
