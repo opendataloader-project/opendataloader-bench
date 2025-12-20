@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 YYMMDD_PATTERN = re.compile(r"^\d{6}$")
-EVALUATION_FILES = ("evaluation.json", "evaluation.csv", "powermetrics.json")
+EVALUATION_FILES = ("evaluation.json", "evaluation.csv")
 
 
 def _parse_args() -> argparse.Namespace:

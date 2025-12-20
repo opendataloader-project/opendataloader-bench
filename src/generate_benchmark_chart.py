@@ -34,7 +34,6 @@ class EngineMetrics:
     mhs: Optional[float]
     mhs_s: Optional[float]
     elapsed_per_page: Optional[float]
-    total_energy_j: Optional[float]
 
 
 def _load_evaluation_metrics(prediction_root: Path) -> List[EngineMetrics]:
@@ -56,18 +55,6 @@ def _load_evaluation_metrics(prediction_root: Path) -> List[EngineMetrics]:
             logging.warning("Failed to read %s: %s", evaluation_path, exc)
             continue
 
-        powermetrics_path = engine_dir / "powermetrics.json"
-        energy_j: Optional[float] = None
-        if powermetrics_path.is_file():
-            try:
-                with powermetrics_path.open(encoding="utf-8") as f:
-                    powermetrics_payload: Dict[str, object] = json.load(f)
-                energy_j = _as_float(
-                    powermetrics_payload.get("total_combined_energy_j")
-                )
-            except (json.JSONDecodeError, OSError) as exc:
-                logging.warning("Failed to read %s: %s", powermetrics_path, exc)
-
         scores = payload.get("metrics", {}).get("score", {})
         summary = payload.get("summary", {})
         engine_name = summary.get("engine_name", "unknown")
@@ -83,7 +70,6 @@ def _load_evaluation_metrics(prediction_root: Path) -> List[EngineMetrics]:
                 mhs=_as_float(scores.get("mhs_mean")),
                 mhs_s=_as_float(scores.get("mhs_s_mean")),
                 elapsed_per_page=_as_float(elapsed_per_page),
-                total_energy_j=energy_j,
             )
         )
 
@@ -232,34 +218,6 @@ def _plot_time_metric(
     ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=8)
 
 
-def _plot_energy_metric(
-    ax, engines: List[EngineMetrics], values: List[Optional[float]]
-) -> None:
-    """Plot total energy consumption from powermetrics.json."""
-
-    sortable = list(zip(engines, values))
-    sortable.sort(
-        key=lambda item: (
-            item[1] is None,
-            item[1] if item[1] is not None else float("inf"),
-        )
-    )
-    sorted_engines = [engine for engine, _ in sortable]
-    sorted_values = [value for _, value in sortable]
-
-    labels = [engine.label for engine in sorted_engines]
-    index = range(len(labels))
-    clean_values = [value or 0.0 for value in sorted_values]
-    bars = ax.bar(labels, clean_values, color="#fbbf24")
-    _ensure_min_bar_height(bars, sorted_values)
-    _add_value_labels(ax, bars, sorted_values)
-    ax.set_title("Energy Consumption (J)")
-    ax.set_ylabel("Joules")
-    ax.set_xticks(list(index))
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=8)
-    ax.set_ylim(bottom=0)
-
-
 def _save_individual_chart(
     plotter: Callable[..., None],
     plot_args: Sequence[object],
@@ -300,29 +258,28 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
     mhs_values = [engine.mhs for engine in engines]
     mhs_s_values = [engine.mhs_s for engine in engines]
     elapsed_values = [engine.elapsed_per_page for engine in engines]
-    energy_values = [engine.total_energy_j for engine in engines]
 
     _plot_single_metric(
         axes[0, 0],
         engines,
         overall_values,
-        "Overall Average",
+        "Extraction Accuracy",
+    )
+
+    _plot_time_metric(
+        axes[0, 1],
+        engines,
+        elapsed_values,
     )
 
     _plot_grouped_metric(
-        axes[0, 1],
+        axes[1, 0],
         engines,
         nid_values,
         nid_s_values,
         "Reading Order",
         "NID",
         "NID-S",
-    )
-
-    _plot_energy_metric(
-        axes[1, 0],
-        engines,
-        energy_values,
     )
 
     _plot_grouped_metric(
@@ -335,14 +292,8 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
         "TEDS-S",
     )
 
-    _plot_time_metric(
-        axes[2, 0],
-        engines,
-        elapsed_values,
-    )
-
     _plot_grouped_metric(
-        axes[2, 1],
+        axes[2, 0],
         engines,
         mhs_values,
         mhs_s_values,
@@ -350,6 +301,8 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
         "MHS",
         "MHS-S",
     )
+
+    axes[2, 1].axis("off")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.suptitle("PDF-to-Markdown Benchmark", fontsize=14)
@@ -364,7 +317,7 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
         (
             "overall",
             _plot_single_metric,
-            (engines, overall_values, "Overall Average"),
+            (engines, overall_values, "Extraction Accuracy"),
         ),
         (
             "reading-order",
@@ -385,11 +338,6 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
             "extraction-time",
             _plot_time_metric,
             (engines, elapsed_values),
-        ),
-        (
-            "energy-consumption",
-            _plot_energy_metric,
-            (engines, energy_values),
         ),
     ]
 
