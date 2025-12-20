@@ -1,243 +1,207 @@
 # opendataloader-bench
 
 ## 1. About the Project
-This repository benchmarks PDF-to-Markdown extraction engines using a shared corpus and harmonised evaluation pipeline. It normalises predictions into Markdown, compares them against curated ground-truth annotations, and reports quality metrics for reading order, table fidelity, and heading hierarchy. The tooling is modular so new engines, corpora, or scoring routines can be slotted in with minimal effort.
+
+PDF documents are everywhere, but LLMs can't read them directly. Converting PDFs to Markdown preserves structure (headings, tables, reading order) that helps LLMs understand and answer questions accurately.
+
+This benchmark compares open-source PDF-to-Markdown engines to help you choose the right tool for your RAG pipeline or document processing workflow.
+
+**What we measure:**
+- **Reading Order** — Is the text extracted in the correct sequence?
+- **Table Fidelity** — Are tables accurately reconstructed?
+- **Heading Hierarchy** — Is the document structure preserved?
+
+The evaluation pipeline is modular—add new engines, corpora, or metrics with minimal effort.
 
 ## 2. Benchmark Results
+
+### Quick Comparison
+
+| Engine | Accuracy | | Speed (s/page) | | Reading Order | | Table | | Heading | |
+|--------|----------|---|----------------|---|---------------|---|-------|---|---------|---|
+| [opendataloader](https://pypi.org/project/opendataloader-pdf/) | 0.82 | #2 | **0.05** | #1 | **0.91** | #1 | 0.49 | #2 | 0.65 | #2 |
+| [docling](https://pypi.org/project/docling/) | **0.88** | #1 | 0.73 | #4 | 0.90 | #2 | **0.89** | #1 | **0.80** | #1 |
+| [pymupdf4llm](https://pypi.org/project/pymupdf4llm/) | 0.73 | #3 | 0.09 | #2 | 0.89 | #3 | 0.40 | #3 | 0.41 | #3 |
+| [markitdown](https://pypi.org/project/markitdown/) | 0.58 | #4 | 0.04 | #1 | 0.88 | #4 | 0.00 | #4 | 0.00 | #4 |
+
+> **Note**: Scores are normalized to [0, 1]. Higher is better for accuracy metrics; lower is better for speed. Bold indicates best performance.
+
+### When to Use Each Engine
+
+| Use Case | Recommended Engine | Why |
+|----------|-------------------|-----|
+| **Best overall balance** | opendataloader | Fast (0.05s/page) with high reading order accuracy |
+| **Maximum accuracy** | docling | Highest scores for tables and headings, but 16x slower |
+| **Speed-critical pipelines** | markitdown | Fastest, but no table/heading extraction |
+| **PyMuPDF ecosystem** | pymupdf4llm | Good balance if already using PyMuPDF |
+
+### Visual Comparison
+
 ![Benchmark Chart](charts/benchmark.png)
 
-Recent runs are summarised by the chart above.
-
-Detailed JSON outputs live alongside each engine/version pair and capture the exact metric values used to render the plot:
+Detailed JSON outputs live alongside each engine and capture the exact metric values:
 
 - [prediction/opendataloader/evaluation.json](prediction/opendataloader/evaluation.json)
 - [prediction/docling/evaluation.json](prediction/docling/evaluation.json)
 - [prediction/pymupdf4llm/evaluation.json](prediction/pymupdf4llm/evaluation.json)
 - [prediction/markitdown/evaluation.json](prediction/markitdown/evaluation.json)
 
-### 2.1. Interpreting `evaluation.json`
-- **Top-level keys**: `summary` (run metadata), `metrics` (corpus aggregates), and `documents` (per-file breakdowns).
-- **`summary`** records engine name/version, hardware info, document count, total runtime, and measurement date.
-- **`metrics.score`** lists the mean for each metric
-    - `overall_mean` is the average of `nid_mean`, `teds_mean`, and `mhs_mean`.
-    - `nid_mean` is the average NID, normalized indel distance score for reading order.
-    - `nid_s_mean` is the average NID-S, normalized indel distance tables stripped score for reading order with tables stripped.
-    - `teds_mean` is the average TEDS, table edit distance score for table structure and content
-    - `teds_s_mean` is the average TEDS-S, table edit distance structure only score for table structure only.
-    - `mhs_mean` is the average MHS, markdown heading-level score for headings and content.
-    - `mhs_s_mean` is the average MHS-S, markdown heading-level structure only score for headings only.
-- **`metrics.*_count`** entries show how many documents were eligible for each metric.
-    - Some documents may lack tables or headings, making them ineligible for `teds` or `mhs` scoring respectively.
-    - Metrics are averaged over the eligible subset
-    - `missing_predictions` counts documents where no output was produced at all.
-- **Each `documents` entry** contains `document_id`, per-metric `scores`, and a `prediction_available` flag to highlight missing outputs
+## 3. Metrics
 
-## 3. Project Structure
-```
-├─ charts/                 # Generated benchmark charts
-├─ ground-truth/           # Markdown references and source annotations
-├─ history/                # Archived evaluation results by date
-├─ pdfs/                   # Input PDF corpus (200 sample documents by default)
-├─ pdfs_thumbnail/         # WebP thumbnails produced from the first PDF page
-├─ prediction/             # Engine outputs grouped by engine/markdown
-├─ src/                    # Conversion, evaluation, and utility scripts
-└─ requirements.txt        # Python dependencies for all scripts
-```
-Key scripts:
-1. `src/run.py` provides a single entry point that runs conversion, evaluation, history archival, and chart generation sequentially.
-2. `src/pdf_parser.py` drives batch conversion across registered engines and records timing metadata.
-3. `src/evaluator.py` aggregates metric scores into `evaluation.json` for every engine/version pair.
-4. `src/generate_benchmark_chart.py` renders benchmark charts for quick visual inspection from existing `evaluation.json` files.
-5. `src/generate_history.py` archives the latest evaluation files into date-stamped folders under `history/`.
+All scores are normalised to the `[0, 1]` range, where higher indicates a closer match to ground truth. Documents missing the artefacts required by a given metric yield `null` in per-document results and are excluded from aggregate means.
 
-## 4. Prerequisites
+### 3.1. Reading Order Similarity (NID, NID-S)
 
-- Python 3.13 or higher.
-- Git LFS
+The reading order is evaluated using Normalized Indel Distance (NID), which measures the similarity between the ground truth and predicted text.
 
-## 5. Getting Started
+$$
+NID = 1 - \frac{\text{distance}}{\text{len(gt)} + \text{len(pred)}}
+$$
 
-### Git LFS Setup
+- **NID**: Compares the full Markdown text of the prediction against the ground truth.
+- **NID-S**: Strips tables before comparison to focus on narrative reading order.
 
-This repository uses Git LFS to manage large PDF files. Before cloning or working with the repository, ensure you have Git LFS installed and configured.
+### 3.2. Table Structure Similarity (TEDS, TEDS-S)
 
-1.  **Install Git LFS**: Follow the instructions on the [Git LFS website](https://git-lfs.com/) to install it for your operating system.
-2.  **Set up Git LFS for this repository**: Once installed, navigate to the repository's root directory in your terminal and run:
-    ```sh
-    git lfs install
-    git lfs pull
-    ```
-    This will download the actual PDF files managed by Git LFS.
+Tables are evaluated using Tree Edit Distance Similarity (TEDS), comparing DOM structures with the APTED algorithm.
+
+$$
+{TEDS}(T_{\text{gt}}, T_{\text{pred}}) = 1 - \frac{{EditDist}(T_{\text{gt}}, T_{\text{pred}})}{\max(|T_{\text{gt}}|, |T_{\text{pred}}|, 1)}
+$$
+
+- **TEDS**: Evaluates both structure and cell text.
+- **TEDS-S**: Structure-only, ignoring textual differences (e.g., OCR noise).
+
+### 3.3. Markdown Heading-Level Similarity (MHS, MHS-S)
+
+Headings are parsed into a flat list and compared using APTED.
+
+$$
+{MHS}(H_{\text{gt}}, H_{\text{pred}}) = 1 - \frac{{EditDist}(H_{\text{gt}}, H_{\text{pred}})}{\max(|H_{\text{gt}}|, |H_{\text{pred}}|, 1)}
+$$
+
+- **MHS**: Rewards correctly positioned headings and aligned content blocks.
+- **MHS-S**: Structure-only, isolating heading topology.
+
+### 3.4. References
+
+- Z. Chen et al. "MDEval: Evaluating and Enhancing Markdown Awareness in Large Language Models." *arXiv:2501.15000*, 2025.
+- X. Zhong et al. "Image-based Table Recognition: Data, Model, and Evaluation." *ECCV Workshops*, 2020.
+- M. Pawlik and N. Augsten. "RTED: A Robust Algorithm for the Tree Edit Distance." *arXiv:1201.0230*, 2011.
+- Upstage AI. "Document Parsing Benchmark (DP-Bench)." Hugging Face, 2024.
+
+---
+
+## 4. Reproduce the Benchmark
+
+Want to run this benchmark yourself or add a new engine? Follow the steps below.
+
+### Prerequisites
+
+- Python 3.13 or higher
+- Git LFS (for PDF files)
 
 ### Installation
 
-1. (Strongly Recommended) create and activate a virtual environment.  
-   > Always work inside a virtual environment (`venv`) to keep project dependencies isolated and prevent version conflicts with other Python projects on your system.
-   > If you want to deactivate venv, run the `deactivate` command.
-
-   Example:
+1. **Clone and set up Git LFS**:
    ```sh
-   python -m venv venv
-
-   # Windows
-   .\venv\Scripts\activate
-
-   # macOS/Linux
-   source venv/bin/activate
+   git clone https://github.com/anthropics/opendataloader-bench.git
+   cd opendataloader-bench
+   git lfs install
+   git lfs pull
    ```
 
-2. Install dependencies:
+2. **Create a virtual environment** (recommended):
+   ```sh
+   python -m venv venv
+   source venv/bin/activate  # macOS/Linux
+   # or: .\venv\Scripts\activate  # Windows
+   ```
+
+3. **Install dependencies**:
    ```sh
    pip install -r requirements.txt
    ```
 
 ### Running the Benchmark
 
-You can either run the full pipeline with a single command or execute each stage manually.
-
-#### Option A: One-shot pipeline (`src/run.py`)
-
-`src/run.py` orchestrates conversion, evaluation, history archival, and benchmark chart generation end-to-end:
+#### Option A: One-shot pipeline
 
 ```sh
 python src/run.py
 ```
 
+This runs conversion, evaluation, history archival, and chart generation end-to-end.
+
 #### Option B: Individual stages
 
-1. **Run Conversions**: Use `src/pdf_parser.py` to convert PDFs to Markdown for all registered engines.
-
 ```sh
+# 1. Convert PDFs to Markdown
 python src/pdf_parser.py
-```
 
-2. **Evaluate Predictions**: Use `src/evaluator.py` to evaluate the generated Markdown against the ground truth.
-
-```sh
+# 2. Evaluate predictions
 python src/evaluator.py
-```
 
-Each engine directory inside `prediction/` should follow the layout `prediction/<engine>/markdown/*.md`, accompanied by an automatically generated `summary.json` and `evaluation.json` once the scripts above are executed.
-
-3. **(Optional) Generate Benchmark Charts**: Use `src/generate_benchmark_chart.py` for quick visual inspection of the PDFs.
-
-```sh
+# 3. (Optional) Generate charts
 python src/generate_benchmark_chart.py
-```
 
-Charts will be saved in the `charts/` directory.
-
-4. **(Optional) Archiving evaluation history**: To archive existing evaluation outputs without re-running the full pipeline, use `src/generate_history.py`. It copies each `prediction/<engine>/evaluation.json` into `history/<yymmdd>/<engine>/evaluation.json`.
-
-```sh
+# 4. (Optional) Archive results
 python src/generate_history.py
 ```
 
-### Targeting Specific Engine or Document ID
-
-By default, the conversion and evaluation scripts run on all available engines. To target a specific one, use the `--engine` and/or `--doc-id` flags.
+#### Targeting Specific Engines or Documents
 
 ```sh
-# Example: Run conversion and evaluation for a specific engine
+# Single engine
 python src/pdf_parser.py --engine opendataloader
 python src/evaluator.py --engine opendataloader
-```
 
-```sh
-# Example: Run conversion and evaluation for a specific document ID
+# Single document
 python src/pdf_parser.py --doc-id 01030000000001
-python src/evaluator.py --doc-id 01030000000001
+
+# Both
+python src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
 ```
+
+### Project Structure
+
+```
+├─ charts/                 # Generated benchmark charts
+├─ ground-truth/           # Markdown references and source annotations
+├─ history/                # Archived evaluation results by date
+├─ pdfs/                   # Input PDF corpus (200 sample documents)
+├─ prediction/             # Engine outputs grouped by engine/markdown
+├─ src/                    # Conversion, evaluation, and utility scripts
+└─ requirements.txt        # Python dependencies
+```
+
+## 5. Contributing
+
+### Development Setup
 
 ```sh
-# Example: Run conversion and evaluation for a specific engine and document ID
-python src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
-python src/evaluator.py --engine opendataloader --doc-id 01030000000001
+# After following the installation steps above:
+pip install -e .
 ```
 
-## 6. Development and Testing
-
-To contribute to this project, you'll need to set up a development environment that allows you to run the test suite.
-
-### Setting up the Environment
-
-1. (Strongly Recommended) create and activate a virtual environment.  
-   > Always work inside a virtual environment (`venv`) to keep project dependencies isolated and prevent version conflicts with other Python projects on your system.
-   > If you want to deactivate venv, run the `deactivate` command.
-
-   Example:
-   ```sh
-   python -m venv venv
-
-   # Windows
-   .\venv\Scripts\activate
-
-   # macOS/Linux
-   source venv/bin/activate
-   ```
-
-2. Install dependencies:
-   ```sh
-   pip install -r requirements.txt
-   ```
-
-3. Install the project in editable mode for development: 
-   ```sh
-   pip install -e .
-   ```
-   This ensures that any changes in the src/ directory are immediately reflected without reinstalling the package.
-
-4. (Optional) If you are using VS Code, you may need to restart Python Intellisense after installing the project in editable mode (`pip install -e .`)
-   1. Open the Command Palette (`Ctrl+Shift+P` on Windows/Linux, `Cmd+Shift+P` on macOS).
-   2. Search for **"Python: Restart Language Server"** and run it.
-   3. Alternatively, restart VS Code entirely.
-
-   Make sure the selected Python interpreter in the VS Code status bar points to the correct virtual environment (e.g., `.venv`) to ensure imports are recognized correctly.
-
+This installs the project in editable mode so changes in `src/` are immediately reflected.
 
 ### Running Tests
-
-Once the project is installed in editable mode, you can run the full test suite with a single command:
 
 ```sh
 pytest
 ```
 
-This will automatically discover and run all tests.
+### Interpreting `evaluation.json`
 
-## 7. Metrics
-All scores are normalised to the `[0, 1]` range, where higher indicates a closer match to ground truth. Documents missing the artefacts required by a given metric yield `null` in per-document results and are excluded from aggregate means. The evaluator also computes an `overall_average`, defined as the arithmetic mean of the available metric scores for a document.
+Each engine produces an `evaluation.json` with:
 
-### 7.1. Reading Order Similarity (NID, NID-S)
-The reading order is evaluated using two metrics based on Normalized Indel Distance (NID), which measures the similarity between the ground truth and predicted text. These metrics provide a score that is sensitive to text length.
+- **`summary`**: Engine name/version, hardware info, document count, runtime, date.
+- **`metrics.score`**: Mean scores (`overall_mean`, `nid_mean`, `teds_mean`, `mhs_mean`, etc.)
+- **`metrics.*_count`**: Number of documents eligible for each metric.
+- **`documents`**: Per-document scores and availability flags.
 
-$$
-NID = 1 - \frac{\text{distance}}{\text{len(gt)} + \text{len(pred)}}
-$$
-
-- **`nid` (Normalized Indel Distance)**: This metric compares the full Markdown text of the prediction against the ground truth. It evaluates the overall similarity, including all content.
-
-- **`nid_s` (Normalized Indel Distance - Stripped)**: This metric provides a more focused evaluation of the narrative reading order. Before comparison, tables (both HTML and Markdown formats) are stripped from both the ground truth and the prediction, and repeated whitespace is collapsed. This ensures that the score reflects the correctness of the body text flow, independent of table formatting.
-
-### 7.2. Table Structure Similarity (TEDS, TEDS-S)
-`evaluate_table` extracts the first table (preferring HTML markup, then falling back to Markdown heuristics) and evaluates it with the Tree Edit Distance Similarity (TEDS) proposed for table structure assessment. The table DOMs are converted into labelled trees and compared using the APTED algorithm with custom tokenization.
-
-$$
-{TEDS}(T_{\text{gt}}, T_{\text{pred}}) = 1 - \frac{{EditDist}(T_{\text{gt}}, T_{\text{pred}})}{\max(|T_{\text{gt}}|, |T_{\text{pred}}|, 1)}
-$$
-
-`TEDS` evaluates both structure and cell text. `TEDS-S` switches the rename cost to be structure-only, isolating layout fidelity when textual mismatches are considered acceptable (for example, OCR noise).
-
-### 7.3. Markdown Heading-Level Similarity (MHS, MHS-S)
-`evaluate_heading_level` parses Markdown into a flat list of heading nodes and associated content blocks while skipping detected tables. Both hierarchies are compared twice with APTED: once with content-aware rename penalties and once with pure structural penalties. The resulting Markdown Heading-Level Similarity (MHS) scores are defined as:
-
-$$
-{MHS}(H_{\text{gt}}, H_{\text{pred}}) = 1 - \frac{{EditDist}(H_{\text{gt}}, H_{\text{pred}})}{\max(|H_{\text{gt}}|, |H_{\text{pred}}|, 1)}
-$$
-
-`MHS` rewards both correctly positioned headings and well-aligned content blocks, while `MHS-S` isolates the heading topology to flag missing or mislevelled sections even when the surrounding prose overlaps.
-
-### 7.4. References
+## 6. References
 
 - Z. Chen, Y. Liu, L. Shi, X. Chen, Y. Zhao, and F. Ren. "MDEval: Evaluating and Enhancing Markdown Awareness in Large Language Models." *arXiv preprint arXiv:2501.15000*, 2025. https://arxiv.org/abs/2501.15000
 - J. He, M. Rungta, D. Koleczek, A. Sekhon, F. X. Wang, and S. Hasan. "Does Prompt Formatting Have Any Impact on LLM Performance?." *arXiv preprint arXiv:2411.10541*, 2024. https://arxiv.org/abs/2411.10541
