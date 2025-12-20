@@ -34,10 +34,12 @@ Detailed JSON outputs live alongside each engine/version pair and capture the ex
 
 ## 3. Project Structure
 ```
+├─ charts/                 # Generated benchmark charts
 ├─ ground-truth/           # Markdown references and source annotations
+├─ history/                # Archived evaluation results by date
 ├─ pdfs/                   # Input PDF corpus (200 sample documents by default)
 ├─ pdfs_thumbnail/         # WebP thumbnails produced from the first PDF page
-├─ prediction/             # Engine outputs grouped by engine/version/markdown
+├─ prediction/             # Engine outputs grouped by engine/markdown
 ├─ src/                    # Conversion, evaluation, and utility scripts
 └─ requirements.txt        # Python dependencies for all scripts
 ```
@@ -115,7 +117,7 @@ python src/pdf_parser.py
 python src/evaluator.py
 ```
 
-Each engine directory inside `prediction/` should follow the layout `prediction/<engine>/<version>/markdown/*.md`, accompanied by an automatically generated `summary.json` and `evaluation.json` once the scripts above are executed.
+Each engine directory inside `prediction/` should follow the layout `prediction/<engine>/markdown/*.md`, accompanied by an automatically generated `summary.json` and `evaluation.json` once the scripts above are executed.
 
 3. **(Optional) Generate Benchmark Charts**: Use `src/generate_benchmark_chart.py` for quick visual inspection of the PDFs.
 
@@ -137,8 +139,8 @@ By default, the conversion and evaluation scripts run on all available engines. 
 
 ```sh
 # Example: Run conversion and evaluation for a specific engine
-python src/pdf_parser.py --engine opendataloader-pdf
-python src/evaluator.py --engine opendataloader-pdf
+python src/pdf_parser.py --engine opendataloader
+python src/evaluator.py --engine opendataloader
 ```
 
 ```sh
@@ -149,8 +151,8 @@ python src/evaluator.py --doc-id 01030000000001
 
 ```sh
 # Example: Run conversion and evaluation for a specific engine and document ID
-python src/pdf_parser.py --engine opendataloader-pdf --doc-id 01030000000001
-python src/evaluator.py --engine opendataloader-pdf --doc-id 01030000000001
+python src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
+python src/evaluator.py --engine opendataloader --doc-id 01030000000001
 ```
 
 ## 6. Development and Testing
