@@ -101,7 +101,7 @@ def _add_value_labels(ax, bars, values: Sequence[Optional[float]]) -> None:
             textcoords="offset points",
             ha="center",
             va="bottom",
-            fontsize=8,
+            fontsize=11,
         )
 
 
@@ -132,10 +132,10 @@ def _plot_single_metric(
     _ensure_min_bar_height(bars, sorted_values)
     _add_value_labels(ax, bars, sorted_values)
     ax.set_ylim(0, 1)
-    ax.set_title(title)
+    ax.set_title(title, fontsize=14)
     ax.set_xticks(list(index))
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=8)
-    ax.set_ylabel("Score")
+    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=12)
+    ax.set_ylabel("Score", fontsize=12)
 
 
 def _plot_grouped_metric(
@@ -184,11 +184,11 @@ def _plot_grouped_metric(
     _add_value_labels(ax, bars2, sorted_secondary)
 
     ax.set_ylim(0, 1)
-    ax.set_title(title)
-    ax.set_ylabel("Score")
+    ax.set_title(title, fontsize=14)
+    ax.set_ylabel("Score", fontsize=12)
     ax.set_xticks(list(index))
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=8)
-    ax.legend(fontsize=8)
+    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=12)
+    ax.legend(fontsize=11)
 
 
 def _plot_time_metric(
@@ -212,10 +212,10 @@ def _plot_time_metric(
     bars = ax.bar(labels, clean_values, color="#F28E2C")
     _ensure_min_bar_height(bars, sorted_values)
     _add_value_labels(ax, bars, sorted_values)
-    ax.set_title("Extraction Time Per Page (s)")
-    ax.set_ylabel("Seconds")
+    ax.set_title("Extraction Time Per Page (s)", fontsize=14)
+    ax.set_ylabel("Seconds", fontsize=12)
     ax.set_xticks(list(index))
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=8)
+    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=12)
 
 
 def _save_individual_chart(
@@ -305,7 +305,7 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
     axes[2, 1].axis("off")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.suptitle("PDF-to-Markdown Benchmark", fontsize=14)
+    fig.suptitle("PDF-to-Markdown Benchmark", fontsize=18)
     fig.savefig(output_path, dpi=200)
     plt.close(fig)
 

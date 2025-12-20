@@ -6,5 +6,7 @@ def to_markdown(_, input_path, output_dir):
         input_path=[input_path],
         output_dir=output_dir,
         format=["markdown"],
+        table_method="cluster",
+        reading_order="xycut",
         quiet=True,
     )

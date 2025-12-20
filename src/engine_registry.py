@@ -12,9 +12,9 @@ EngineHandler = Callable[..., None]
 
 
 ENGINES: Dict[str, str] = {
-    "opendataloader": "1.3.0",
-    "docling": "2.61.2",
-    "markitdown": "0.1.3",
+    "opendataloader": "1.4.1",
+    "docling": "2.65.0",
+    "markitdown": "0.1.4",
 }
 
 
