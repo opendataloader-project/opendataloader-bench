@@ -1,9 +1,9 @@
 {
     "engine_name": "opendataloader",
-    "engine_version": "1.4.1",
+    "engine_version": "1.5.1",
     "processor": "Apple M4",
     "document_count": 200,
-    "total_elapsed": 9.04926586151123,
-    "elapsed_per_doc": 0.04524632930755615,
-    "date": "2025-12-20"
+    "total_elapsed": 9.17992115020752,
+    "elapsed_per_doc": 0.045899605751037596,
+    "date": "2025-12-22"
 }
