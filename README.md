@@ -111,24 +111,19 @@ Want to run this benchmark yourself or add a new engine? Follow the steps below.
    git lfs pull
    ```
 
-2. **Create a virtual environment** (recommended):
+2. **Install dependencies with uv**:
    ```sh
-   python -m venv venv
-   source venv/bin/activate  # macOS/Linux
-   # or: .\venv\Scripts\activate  # Windows
+   uv sync
    ```
 
-3. **Install dependencies**:
-   ```sh
-   pip install -r requirements.txt
-   ```
+   > Don't have uv? See [installation guide](https://docs.astral.sh/uv/getting-started/installation/)
 
 ### Running the Benchmark
 
 #### Option A: One-shot pipeline
 
 ```sh
-python src/run.py
+uv run src/run.py
 ```
 
 This runs conversion, evaluation, history archival, and chart generation end-to-end.
@@ -137,30 +132,30 @@ This runs conversion, evaluation, history archival, and chart generation end-to-
 
 ```sh
 # 1. Convert PDFs to Markdown
-python src/pdf_parser.py
+uv run src/pdf_parser.py
 
 # 2. Evaluate predictions
-python src/evaluator.py
+uv run src/evaluator.py
 
 # 3. (Optional) Generate charts
-python src/generate_benchmark_chart.py
+uv run src/generate_benchmark_chart.py
 
 # 4. (Optional) Archive results
-python src/generate_history.py
+uv run src/generate_history.py
 ```
 
 #### Targeting Specific Engines or Documents
 
 ```sh
 # Single engine
-python src/pdf_parser.py --engine opendataloader
-python src/evaluator.py --engine opendataloader
+uv run src/pdf_parser.py --engine opendataloader
+uv run src/evaluator.py --engine opendataloader
 
 # Single document
-python src/pdf_parser.py --doc-id 01030000000001
+uv run src/pdf_parser.py --doc-id 01030000000001
 
 # Both
-python src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
+uv run src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
 ```
 
 ### Project Structure
@@ -172,7 +167,7 @@ python src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
 ├─ pdfs/                   # Input PDF corpus (200 sample documents)
 ├─ prediction/             # Engine outputs grouped by engine/markdown
 ├─ src/                    # Conversion, evaluation, and utility scripts
-└─ requirements.txt        # Python dependencies
+└─ pyproject.toml          # Python dependencies (uv)
 ```
 
 ## 5. Contributing
@@ -181,15 +176,15 @@ python src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
 
 ```sh
 # After following the installation steps above:
-pip install -e .
+uv sync --dev
 ```
 
-This installs the project in editable mode so changes in `src/` are immediately reflected.
+This installs development dependencies including pytest.
 
 ### Running Tests
 
 ```sh
-pytest
+uv run pytest
 ```
 
 ### Interpreting `evaluation.json`
