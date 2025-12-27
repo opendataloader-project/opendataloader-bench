@@ -3,6 +3,7 @@ name = "opendataloader-bench"
 version = "0.1.0"
 description = "Benchmark for PDF-to-Markdown conversion engines"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.13"
 dependencies = [
     "apted>=1.0.3",
