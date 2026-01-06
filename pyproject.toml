@@ -10,6 +10,7 @@ dependencies = [
     "beautifulsoup4>=4.14.3",
     "docling>=2.65.0",
     "lxml>=6.0.2",
+    "marker-pdf>=1.0.0",
     "markitdown[pdf]>=0.1.4",
     "matplotlib>=3.10.8",
     "opendataloader-pdf>=1.4.1",
