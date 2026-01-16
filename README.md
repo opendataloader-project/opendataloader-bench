@@ -17,23 +17,17 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 ### Quick Comparison
 
-| Engine             | Speed (s/page) | Reading Order | Table    | Heading  |
-|--------------------|----------------|---------------|----------|----------|
-| opendataloader     | **0.05**       | **0.91**      | 0.49     | 0.65     |
-| docling            | 0.73           | 0.90          | **0.89** | **0.80** |
-| pymupdf4llm        | 0.09           | 0.89          | 0.40     | 0.41     |
-| markitdown         | **0.04**       | 0.88          | 0.00     | 0.00     |
+| Engine                      | Overall  | Reading Order | Table    | Heading  | Speed (s/page) |
+|-----------------------------|----------|---------------|----------|----------|----------------|
+| **opendataloader**          | 0.68     | 0.91          | 0.49     | 0.65     | **0.05**       |
+| **opendataloader [hybrid]** | **0.88** | **0.93**      | **0.93** | 0.78     | 0.48           |
+| docling                     | 0.86     | 0.90          | 0.89     | **0.80** | 0.73           |
+| marker                      | 0.83     | 0.89          | 0.81     | **0.80** | 53.93          |
+| mineru                      | 0.82     | 0.86          | 0.87     | 0.74     | 5.96           |
+| pymupdf4llm                 | 0.57     | 0.89          | 0.40     | 0.41     | 0.09           |
+| markitdown                  | 0.29     | 0.88          | 0.00     | 0.00     | **0.04**       |
 
 > Scores are normalized to [0, 1]. Higher is better for accuracy metrics; lower is better for speed. **Bold** indicates best performance.
-
-### When to Use Each Engine
-
-| Use Case                 | Recommended Engine | Why                                                    |
-|--------------------------|--------------------|--------------------------------------------------------|
-| Best overall balance     | opendataloader     | Fast with high reading order accuracy     |
-| Maximum accuracy         | docling            | Highest scores for tables and headings, but 16x slower |
-| Speed-critical pipelines | markitdown         | Fastest, but no table/heading extraction               |
-| PyMuPDF ecosystem        | pymupdf4llm        | Good balance if already using PyMuPDF                  |
 
 ### Visual Comparison
 
@@ -42,7 +36,10 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 Detailed JSON outputs live alongside each engine and capture the exact metric values:
 
 - [prediction/opendataloader/evaluation.json](prediction/opendataloader/evaluation.json)
+- [prediction/opendataloader_hybrid/evaluation.json](prediction/opendataloader_hybrid/evaluation.json)
 - [prediction/docling/evaluation.json](prediction/docling/evaluation.json)
+- [prediction/marker/evaluation.json](prediction/marker/evaluation.json)
+- [prediction/mineru/evaluation.json](prediction/mineru/evaluation.json)
 - [prediction/pymupdf4llm/evaluation.json](prediction/pymupdf4llm/evaluation.json)
 - [prediction/markitdown/evaluation.json](prediction/markitdown/evaluation.json)
 

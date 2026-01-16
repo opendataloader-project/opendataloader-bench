@@ -20,6 +20,13 @@ DEFAULT_PREDICTION_ROOT = Path("prediction")
 DEFAULT_OUTPUT_PATH = Path("charts/benchmark.png")
 MIN_BAR_HEIGHT = 0.01
 
+# Colors for accuracy charts
+WINNER_COLOR = "#4C78A8"      # blue for 1st place
+OTHER_COLOR = "#94A3B8"       # medium slate for others
+# Colors for time chart
+TIME_WINNER_COLOR = "#F28E2C" # orange for 1st place
+TIME_OTHER_COLOR = "#FDBA74"  # medium orange for others
+
 
 @dataclass
 class EngineMetrics:
@@ -116,7 +123,10 @@ def _ensure_min_bar_height(bars, values: Sequence[Optional[float]]) -> None:
 
 
 def _plot_single_metric(
-    ax, engines: List[EngineMetrics], values: List[Optional[float]], title: str
+    ax,
+    engines: List[EngineMetrics],
+    values: List[Optional[float]],
+    title: str,
 ) -> None:
     """Plot a single bar chart for one metric."""
 
@@ -128,7 +138,8 @@ def _plot_single_metric(
     labels = [engine.label for engine in sorted_engines]
     index = range(len(labels))
     clean_values = [value or 0.0 for value in sorted_values]
-    bars = ax.bar(labels, clean_values, color="#4C78A8")
+    colors = [WINNER_COLOR if i == 0 else OTHER_COLOR for i in range(len(labels))]
+    bars = ax.bar(labels, clean_values, color=colors)
     _ensure_min_bar_height(bars, sorted_values)
     _add_value_labels(ax, bars, sorted_values)
     ax.set_ylim(0, 1)
@@ -192,7 +203,9 @@ def _plot_grouped_metric(
 
 
 def _plot_time_metric(
-    ax, engines: List[EngineMetrics], values: List[Optional[float]]
+    ax,
+    engines: List[EngineMetrics],
+    values: List[Optional[float]],
 ) -> None:
     """Plot extraction time per page."""
 
@@ -209,7 +222,8 @@ def _plot_time_metric(
     labels = [engine.label for engine in sorted_engines]
     index = range(len(labels))
     clean_values = [value or 0.0 for value in sorted_values]
-    bars = ax.bar(labels, clean_values, color="#F28E2C")
+    colors = [TIME_WINNER_COLOR if i == 0 else TIME_OTHER_COLOR for i in range(len(labels))]
+    bars = ax.bar(labels, clean_values, color=colors)
     _ensure_min_bar_height(bars, sorted_values)
     _add_value_labels(ax, bars, sorted_values)
     ax.set_title("Extraction Time Per Page (s)", fontsize=14)
@@ -252,11 +266,8 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
 
     overall_values = [engine.overall for engine in engines]
     nid_values = [engine.nid for engine in engines]
-    nid_s_values = [engine.nid_s for engine in engines]
     teds_values = [engine.teds for engine in engines]
-    teds_s_values = [engine.teds_s for engine in engines]
     mhs_values = [engine.mhs for engine in engines]
-    mhs_s_values = [engine.mhs_s for engine in engines]
     elapsed_values = [engine.elapsed_per_page for engine in engines]
 
     _plot_single_metric(
@@ -272,34 +283,25 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
         elapsed_values,
     )
 
-    _plot_grouped_metric(
+    _plot_single_metric(
         axes[1, 0],
         engines,
         nid_values,
-        nid_s_values,
-        "Reading Order",
-        "NID",
-        "NID-S",
+        "Reading Order (NID)",
     )
 
-    _plot_grouped_metric(
+    _plot_single_metric(
         axes[1, 1],
         engines,
         teds_values,
-        teds_s_values,
-        "Table Structure",
-        "TEDS",
-        "TEDS-S",
+        "Table Structure (TEDS)",
     )
 
-    _plot_grouped_metric(
+    _plot_single_metric(
         axes[2, 0],
         engines,
         mhs_values,
-        mhs_s_values,
-        "Heading Level",
-        "MHS",
-        "MHS-S",
+        "Heading Level (MHS)",
     )
 
     axes[2, 1].axis("off")
@@ -321,18 +323,18 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
         ),
         (
             "reading-order",
-            _plot_grouped_metric,
-            (engines, nid_values, nid_s_values, "Reading Order", "NID", "NID-S"),
+            _plot_single_metric,
+            (engines, nid_values, "Reading Order (NID)"),
         ),
         (
             "table-structure",
-            _plot_grouped_metric,
-            (engines, teds_values, teds_s_values, "Table Structure", "TEDS", "TEDS-S"),
+            _plot_single_metric,
+            (engines, teds_values, "Table Structure (TEDS)"),
         ),
         (
             "heading-level",
-            _plot_grouped_metric,
-            (engines, mhs_values, mhs_s_values, "Heading Level", "MHS", "MHS-S"),
+            _plot_single_metric,
+            (engines, mhs_values, "Heading Level (MHS)"),
         ),
         (
             "extraction-time",

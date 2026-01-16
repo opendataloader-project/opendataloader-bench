@@ -1,0 +1,9 @@
+{
+    "engine_name": "mineru",
+    "engine_version": "2.7.0",
+    "processor": "Apple M4",
+    "document_count": 200,
+    "total_elapsed": 1192.3007547855377,
+    "elapsed_per_doc": 5.961503773927689,
+    "date": "2026-01-06"
+}

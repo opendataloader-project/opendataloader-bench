@@ -1,0 +1,9 @@
+{
+    "engine_name": "opendataloader-hybrid",
+    "engine_version": "1.6.2",
+    "processor": "Apple M4",
+    "document_count": 200,
+    "total_elapsed": 95.68113112449646,
+    "elapsed_per_doc": 0.4784056556224823,
+    "date": "2026-01-06"
+}
