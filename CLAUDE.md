@@ -14,6 +14,11 @@ uv run src/run.py                    # Run complete benchmark: parse → evaluat
 uv run src/run.py --engine docling   # Run for single engine
 ```
 
+### CI Mode (used by opendataloader-pdf CI)
+```sh
+OPENDATALOADER_JAR=/path/to/jar uv run src/run.py --engine opendataloader --check-regression
+```
+
 ### Individual Stages
 ```sh
 uv run src/pdf_parser.py             # Convert PDFs to Markdown (all engines)
@@ -51,6 +56,8 @@ Each evaluator returns `(score, structure_only_score)` tuples:
 - **evaluator_reading_order.py** - NID/NID-S using normalized Indel distance (rapidfuzz)
 - **evaluator_table.py** - TEDS/TEDS-S using tree edit distance (APTED algorithm)
 - **evaluator_heading_level.py** - MHS/MHS-S comparing heading structure trees
+- **evaluator_table_detection.py** - Binary classification of table presence (precision/recall/F1)
+- **evaluator_triage.py** - Page triage decisions for hybrid mode
 
 ### Shared Utility
 **converter_markdown_table.py** - Converts Markdown tables to HTML for consistent evaluation across all metrics.
