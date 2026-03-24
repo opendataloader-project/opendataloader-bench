@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Sequence
@@ -48,15 +50,126 @@ def _resolve_history_date(date_arg: Optional[str]) -> str:
     return date_arg
 
 
-def run_pipeline(args: argparse.Namespace) -> None:
+def check_regression(eval_data: dict, thresholds_path: Path) -> bool:
+    """Check if evaluation results meet threshold requirements.
+
+    Returns:
+        True if all thresholds are met, False otherwise
+    """
+    if not thresholds_path.exists():
+        logging.warning("Thresholds file not found: %s", thresholds_path)
+        return True
+
+    with thresholds_path.open(encoding="utf-8") as f:
+        thresholds = json.load(f)
+
+    scores = eval_data.get("metrics", {}).get("score", {})
+    table_detection = eval_data.get("table_detection", {})
+    speed = eval_data.get("speed", {})
+
+    failures = []
+
+    nid = scores.get("nid_mean")
+    if nid is not None and nid < thresholds.get("nid", 0):
+        failures.append(f"NID {nid:.4f} < {thresholds['nid']}")
+
+    teds = scores.get("teds_mean")
+    if teds is not None and teds < thresholds.get("teds", 0):
+        failures.append(f"TEDS {teds:.4f} < {thresholds['teds']}")
+
+    mhs = scores.get("mhs_mean")
+    if mhs is not None and mhs < thresholds.get("mhs", 0):
+        failures.append(f"MHS {mhs:.4f} < {thresholds['mhs']}")
+
+    td_f1 = table_detection.get("f1")
+    if td_f1 is not None and td_f1 < thresholds.get("table_detection_f1", 0):
+        failures.append(f"Table Detection F1 {td_f1:.4f} < {thresholds['table_detection_f1']}")
+
+    elapsed_per_doc = speed.get("elapsed_per_doc")
+    if elapsed_per_doc is not None and elapsed_per_doc > thresholds.get("elapsed_per_doc", float("inf")):
+        failures.append(f"Speed {elapsed_per_doc:.2f}s/doc > {thresholds['elapsed_per_doc']}s/doc")
+
+    triage = eval_data.get("triage", {})
+    if triage:
+        triage_recall = triage.get("recall")
+        if triage_recall is not None and triage_recall < thresholds.get("triage_recall", 0):
+            failures.append(f"Triage Recall {triage_recall:.4f} < {thresholds['triage_recall']}")
+
+        triage_fn = triage.get("fn_count", 0)
+        triage_fn_max = thresholds.get("triage_fn_max")
+        if triage_fn_max is not None and triage_fn > triage_fn_max:
+            failures.append(f"Triage FN {triage_fn} > {triage_fn_max}")
+
+    if failures:
+        logging.error("Regression detected:")
+        for failure in failures:
+            logging.error("  - %s", failure)
+        return False
+
+    logging.info("All thresholds met.")
+    return True
+
+
+def print_summary(eval_data: dict) -> None:
+    """Print a summary of evaluation results."""
+    scores = eval_data.get("metrics", {}).get("score", {})
+    table_detection = eval_data.get("table_detection", {})
+    speed = eval_data.get("speed", {})
+    triage = eval_data.get("triage", {})
+
+    print("\n" + "=" * 50)
+    print("BENCHMARK RESULTS")
+    print("=" * 50)
+
+    nid = scores.get("nid_mean")
+    teds = scores.get("teds_mean")
+    mhs = scores.get("mhs_mean")
+    td_f1 = table_detection.get("f1")
+    td_precision = table_detection.get("precision")
+    td_recall = table_detection.get("recall")
+    elapsed_per_doc = speed.get("elapsed_per_doc")
+    total_elapsed = speed.get("total_elapsed")
+    document_count = speed.get("document_count")
+
+    print(f"NID  (Reading Order):     {nid:.4f}" if nid else "NID:  N/A")
+    print(f"TEDS (Table Structure):   {teds:.4f}" if teds else "TEDS: N/A")
+    print(f"MHS  (Heading Structure): {mhs:.4f}" if mhs else "MHS:  N/A")
+    print()
+    print("Table Detection:")
+    td_accuracy = table_detection.get("accuracy")
+    print(f"  Precision: {td_precision:.4f}" if td_precision else "  Precision: N/A")
+    print(f"  Recall:    {td_recall:.4f}" if td_recall else "  Recall: N/A")
+    print(f"  F1:        {td_f1:.4f}" if td_f1 else "  F1: N/A")
+    print(f"  Accuracy:  {td_accuracy:.4f}" if td_accuracy else "  Accuracy: N/A")
+    print()
+    print("Speed:")
+    print(f"  Per Document: {elapsed_per_doc:.2f}s" if elapsed_per_doc else "  Per Document: N/A")
+    print(f"  Total:        {total_elapsed:.1f}s ({document_count} docs)" if total_elapsed else "  Total: N/A")
+
+    if triage:
+        print()
+        print("Triage (Hybrid Mode):")
+        tr_recall = triage.get("recall")
+        tr_precision = triage.get("precision")
+        tr_f1 = triage.get("f1")
+        print(f"  Recall:    {tr_recall:.4f}" if tr_recall is not None else "  Recall: N/A")
+        print(f"  Precision: {tr_precision:.4f}" if tr_precision is not None else "  Precision: N/A")
+        print(f"  F1:        {tr_f1:.4f}" if tr_f1 is not None else "  F1: N/A")
+
+    print("=" * 50 + "\n")
+
+
+def run_pipeline(args: argparse.Namespace) -> Optional[dict]:
     """Execute parsing, evaluation, history archival, and chart generation."""
 
     project_root = Path(__file__).parent.parent.resolve()
     input_dir = _resolve_path(args.input_dir, project_root)
     ground_truth_dir = _resolve_path(args.ground_truth_dir, project_root)
     prediction_root = _resolve_path(args.prediction_root, project_root)
-    history_root = _resolve_path(args.history_root, project_root)
-    chart_output = _resolve_path(args.chart_output, project_root)
+
+    # Set JAR path env var if provided
+    if hasattr(args, "jar_path") and args.jar_path:
+        os.environ["OPENDATALOADER_JAR"] = str(Path(args.jar_path).resolve())
 
     engines = _select_engine(args.engine)
     if not engines:
@@ -82,8 +195,61 @@ def run_pipeline(args: argparse.Namespace) -> None:
     if not evaluation_paths:
         raise RuntimeError("Evaluation stage did not produce any reports.")
 
+    # Load evaluation results for additional metrics
+    eval_path = evaluation_paths[0]
+    with eval_path.open(encoding="utf-8") as f:
+        eval_data = json.load(f)
+
+    # Table detection evaluation
+    reference_path = ground_truth_dir / "reference.json"
+    if reference_path.exists():
+        from evaluator_table_detection import evaluate_table_detection_batch
+
+        engine_name = eval_path.parent.name
+        prediction_markdown_dir = prediction_root / engine_name / "markdown"
+        table_detection_metrics = evaluate_table_detection_batch(
+            reference_path, prediction_markdown_dir
+        )
+        eval_data["table_detection"] = table_detection_metrics.to_dict()
+        logging.info("Table detection: F1=%.4f", table_detection_metrics.f1 or 0)
+
+    # Speed metrics from summary.json
+    engine_name = eval_path.parent.name
+    summary_path = prediction_root / engine_name / "summary.json"
+    if summary_path.exists():
+        with summary_path.open(encoding="utf-8") as f:
+            summary_data = json.load(f)
+        eval_data["speed"] = {
+            "total_elapsed": summary_data.get("total_elapsed"),
+            "elapsed_per_doc": summary_data.get("elapsed_per_doc"),
+            "document_count": summary_data.get("document_count"),
+            "processor": summary_data.get("processor"),
+        }
+
+    # Triage evaluation (for hybrid engines)
+    if reference_path.exists():
+        from evaluator_triage import evaluate_triage_batch
+
+        prediction_engine_dir = prediction_root / engine_name
+        triage_metrics = evaluate_triage_batch(reference_path, prediction_engine_dir)
+        if triage_metrics.total_pages_evaluated > 0:
+            eval_data["triage"] = triage_metrics.to_dict()
+            logging.info("Triage: recall=%.4f, fn=%d",
+                         triage_metrics.recall or 0, triage_metrics.fn_count)
+
+    # Save updated evaluation
+    with eval_path.open("w", encoding="utf-8") as f:
+        json.dump(eval_data, f, indent=2, ensure_ascii=False)
+
+    # Skip history/chart in CI mode
+    if args.check_regression:
+        return eval_data
+
+    # History archival
+    history_root = _resolve_path(args.history_root, project_root)
+    chart_output = _resolve_path(args.chart_output, project_root)
+
     date_folder = _resolve_history_date(args.history_date)
-    archived_paths: List[Path] = []
     logging.info("Archiving evaluation results under history/%s", date_folder)
     for evaluation_path in evaluation_paths:
         engine_name = evaluation_path.parent.name
@@ -94,12 +260,13 @@ def run_pipeline(args: argparse.Namespace) -> None:
             date_folder=date_folder,
             overwrite=args.history_overwrite,
         )
-        archived_paths.append(archived)
         logging.info("[%s] Archived evaluation to %s", engine_name, archived)
 
     logging.info("Generating benchmark charts...")
     chart_path = generate_charts(prediction_root, chart_output)
     logging.info("Benchmark chart written to %s", chart_path)
+
+    return eval_data
 
 
 def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
@@ -171,6 +338,21 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         default="INFO",
         help="Logging verbosity (e.g. INFO, DEBUG).",
     )
+    parser.add_argument(
+        "--check-regression",
+        action="store_true",
+        help="Check results against thresholds and exit with error if failed. Skips history/chart generation.",
+    )
+    parser.add_argument(
+        "--thresholds",
+        default="thresholds.json",
+        help="Path to thresholds JSON file (default: thresholds.json in project root).",
+    )
+    parser.add_argument(
+        "--jar-path",
+        default=None,
+        help="Path to opendataloader-pdf CLI JAR for JAR-based execution (sets OPENDATALOADER_JAR).",
+    )
     return parser.parse_args(argv)
 
 
@@ -178,7 +360,17 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     args = _parse_args(argv)
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO))
     try:
-        run_pipeline(args)
+        eval_data = run_pipeline(args)
+
+        if eval_data:
+            print_summary(eval_data)
+
+        if args.check_regression and eval_data:
+            project_root = Path(__file__).parent.parent.resolve()
+            thresholds_path = _resolve_path(args.thresholds, project_root)
+            if not check_regression(eval_data, thresholds_path):
+                raise SystemExit(1)
+
     except Exception as exc:  # pragma: no cover - CLI entry point
         logging.error("Pipeline failed: %s", exc)
         raise SystemExit(1) from exc

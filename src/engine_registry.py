@@ -8,6 +8,8 @@ import pdf_parser_docling as docling
 import pdf_parser_markitdown as markitdown
 import pdf_parser_opendataloader as opendataloader
 import pdf_parser_opendataloader_hybrid as opendataloader_hybrid
+import pdf_parser_opendataloader_hybrid_docling_fast as opendataloader_hybrid_docling_fast
+import pdf_parser_opendataloader_hybrid_hancom as opendataloader_hybrid_hancom
 
 EngineHandler = Callable[..., None]
 
@@ -15,6 +17,8 @@ EngineHandler = Callable[..., None]
 ENGINES: Dict[str, str] = {
     "opendataloader": "1.9.1",
     "opendataloader-hybrid": "1.9.1",
+    "opendataloader-hybrid-docling-fast": "1.9.1",
+    "opendataloader-hybrid-hancom": "1.9.1",
     "docling": "2.65.0",
     "markitdown": "0.1.4",
 }
@@ -23,6 +27,8 @@ ENGINES: Dict[str, str] = {
 ENGINE_DISPATCH: Dict[str, EngineHandler] = {
     "opendataloader": opendataloader.to_markdown,
     "opendataloader-hybrid": opendataloader_hybrid.to_markdown,
+    "opendataloader-hybrid-docling-fast": opendataloader_hybrid_docling_fast.to_markdown,
+    "opendataloader-hybrid-hancom": opendataloader_hybrid_hancom.to_markdown,
     "docling": docling.to_markdown,
-    "markitdown": markitdown.to_markdown
+    "markitdown": markitdown.to_markdown,
 }
