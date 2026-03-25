@@ -66,38 +66,45 @@ def check_regression(eval_data: dict, thresholds_path: Path) -> bool:
     scores = eval_data.get("metrics", {}).get("score", {})
     table_detection = eval_data.get("table_detection", {})
     speed = eval_data.get("speed", {})
+    tol = thresholds.get("regression_tolerance", 0)
 
     failures = []
 
     nid = scores.get("nid_mean")
-    if nid is not None and nid < thresholds.get("nid", 0):
-        failures.append(f"NID {nid:.4f} < {thresholds['nid']}")
+    nid_thresh = thresholds.get("nid")
+    if nid is not None and nid_thresh is not None and nid < nid_thresh - tol:
+        failures.append(f"NID {nid:.4f} < {nid_thresh} - {tol}")
 
     teds = scores.get("teds_mean")
-    if teds is not None and teds < thresholds.get("teds", 0):
-        failures.append(f"TEDS {teds:.4f} < {thresholds['teds']}")
+    teds_thresh = thresholds.get("teds")
+    if teds is not None and teds_thresh is not None and teds < teds_thresh - tol:
+        failures.append(f"TEDS {teds:.4f} < {teds_thresh} - {tol}")
 
     mhs = scores.get("mhs_mean")
-    if mhs is not None and mhs < thresholds.get("mhs", 0):
-        failures.append(f"MHS {mhs:.4f} < {thresholds['mhs']}")
+    mhs_thresh = thresholds.get("mhs")
+    if mhs is not None and mhs_thresh is not None and mhs < mhs_thresh - tol:
+        failures.append(f"MHS {mhs:.4f} < {mhs_thresh} - {tol}")
 
     td_f1 = table_detection.get("f1")
-    if td_f1 is not None and td_f1 < thresholds.get("table_detection_f1", 0):
-        failures.append(f"Table Detection F1 {td_f1:.4f} < {thresholds['table_detection_f1']}")
+    td_f1_thresh = thresholds.get("table_detection_f1")
+    if td_f1 is not None and td_f1_thresh is not None and td_f1 < td_f1_thresh - tol:
+        failures.append(f"Table Detection F1 {td_f1:.4f} < {td_f1_thresh} - {tol}")
 
     elapsed_per_doc = speed.get("elapsed_per_doc")
-    if elapsed_per_doc is not None and elapsed_per_doc > thresholds.get("elapsed_per_doc", float("inf")):
-        failures.append(f"Speed {elapsed_per_doc:.2f}s/doc > {thresholds['elapsed_per_doc']}s/doc")
+    elapsed_thresh = thresholds.get("elapsed_per_doc")
+    if elapsed_per_doc is not None and elapsed_thresh is not None and elapsed_per_doc > elapsed_thresh:
+        failures.append(f"Speed {elapsed_per_doc:.2f}s/doc > {elapsed_thresh}s/doc")
 
     triage = eval_data.get("triage", {})
     if triage:
         triage_recall = triage.get("recall")
-        if triage_recall is not None and triage_recall < thresholds.get("triage_recall", 0):
-            failures.append(f"Triage Recall {triage_recall:.4f} < {thresholds['triage_recall']}")
+        triage_recall_thresh = thresholds.get("triage_recall")
+        if triage_recall is not None and triage_recall_thresh is not None and triage_recall < triage_recall_thresh - tol:
+            failures.append(f"Triage Recall {triage_recall:.4f} < {triage_recall_thresh} - {tol}")
 
-        triage_fn = triage.get("fn_count", 0)
+        triage_fn = triage.get("fn_count")
         triage_fn_max = thresholds.get("triage_fn_max")
-        if triage_fn_max is not None and triage_fn > triage_fn_max:
+        if triage_fn is not None and triage_fn_max is not None and triage_fn > triage_fn_max:
             failures.append(f"Triage FN {triage_fn} > {triage_fn_max}")
 
     if failures:
