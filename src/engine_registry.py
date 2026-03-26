@@ -15,11 +15,11 @@ EngineHandler = Callable[..., None]
 
 
 ENGINES: Dict[str, str] = {
-    "opendataloader": "1.9.1",
-    "opendataloader-hybrid": "1.9.1",
-    "opendataloader-hybrid-docling-fast": "1.9.1",
-    "opendataloader-hybrid-hancom": "1.9.1",
-    "docling": "2.65.0",
+    "opendataloader": "2.1.1",
+    "opendataloader-hybrid": "2.1.1",
+    "opendataloader-hybrid-docling-fast": "2.1.1",
+    "opendataloader-hybrid-hancom": "2.1.1",
+    "docling": "2.82.0",
     "markitdown": "0.1.4",
 }
 

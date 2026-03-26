@@ -19,8 +19,8 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 | Engine                      | Overall  | Reading Order | Table    | Heading  | Speed (s/page) |
 |-----------------------------|----------|---------------|----------|----------|----------------|
-| **opendataloader**          | 0.84     | 0.91          | 0.49     | 0.76     | **0.05**       |
-| **opendataloader [hybrid]** | **0.91** | **0.94**      | **0.93** | **0.83** | 0.43           |
+| **opendataloader**          | 0.84     | 0.91          | 0.49     | 0.74     | **0.05**       |
+| **opendataloader [hybrid]** | **0.90** | **0.94**      | **0.93** | **0.81** | 0.46           |
 | docling                     | 0.86     | 0.90          | 0.89     | 0.80     | 0.73           |
 | marker                      | 0.83     | 0.89          | 0.81     | 0.80     | 53.93          |
 | mineru                      | 0.82     | 0.86          | 0.87     | 0.74     | 5.96           |
