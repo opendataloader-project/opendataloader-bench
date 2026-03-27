@@ -226,8 +226,9 @@ def _plot_time_metric(
     bars = ax.bar(labels, clean_values, color=colors)
     _ensure_min_bar_height(bars, sorted_values)
     _add_value_labels(ax, bars, sorted_values)
+    ax.set_yscale("log")
     ax.set_title("Extraction Time Per Page (s)", fontsize=14)
-    ax.set_ylabel("Seconds", fontsize=12)
+    ax.set_ylabel("Seconds (log scale)", fontsize=12)
     ax.set_xticks(list(index))
     ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=12)
 
