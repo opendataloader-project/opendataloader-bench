@@ -62,6 +62,13 @@ Each evaluator returns `(score, structure_only_score)` tuples:
 ### Shared Utility
 **converter_markdown_table.py** - Converts Markdown tables to HTML for consistent evaluation across all metrics.
 
+### Updating Benchmark Results
+When re-running benchmarks with a new engine version:
+1. Update version strings in `engine_registry.py`
+2. Run the benchmark (e.g. `uv run src/run.py --engine opendataloader`)
+3. Update `thresholds.json` to match the new measured values (nid, teds, mhs, etc.)
+4. Update the results table in `README.md`
+
 ### Directory Structure
 - `pdfs/` - Input PDF corpus (200 documents)
 - `ground-truth/markdown/` - Reference Markdown files
