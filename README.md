@@ -25,6 +25,7 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 | marker                      | 0.83     | 0.89          | 0.81     | 0.80     | 53.93          |
 | mineru                      | 0.82     | 0.86          | 0.87     | 0.74     | 5.96           |
 | pymupdf4llm                 | 0.57     | 0.89          | 0.40     | 0.41     | 0.09           |
+| liteparse                   | 0.57     | 0.86          | 0.00     | 0.00     | 0.19           |
 | markitdown                  | 0.29     | 0.88          | 0.00     | 0.00     | **0.04**       |
 
 > Scores are normalized to [0, 1]. Higher is better for accuracy metrics; lower is better for speed. **Bold** indicates best performance.
@@ -41,6 +42,7 @@ Detailed JSON outputs live alongside each engine and capture the exact metric va
 - [prediction/marker/evaluation.json](prediction/marker/evaluation.json)
 - [prediction/mineru/evaluation.json](prediction/mineru/evaluation.json)
 - [prediction/pymupdf4llm/evaluation.json](prediction/pymupdf4llm/evaluation.json)
+- [prediction/liteparse/evaluation.json](prediction/liteparse/evaluation.json)
 - [prediction/markitdown/evaluation.json](prediction/markitdown/evaluation.json)
 
 ## 3. Metrics
