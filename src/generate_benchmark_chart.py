@@ -270,52 +270,38 @@ def _save_grouped_quality_chart(
     mhs_values: List[Optional[float]],
     output_path: Path,
 ) -> None:
-    """Grouped horizontal bar chart with NID, TEDS, MHS per engine."""
+    """Three-column horizontal bar chart: NID | TEDS | MHS."""
 
-    import numpy as np
-
-    # Sort by average of the three metrics (best on top)
-    combined = list(zip(engines, nid_values, teds_values, mhs_values))
-    combined.sort(
-        key=lambda item: -(
-            ((item[1] or 0) + (item[2] or 0) + (item[3] or 0)) / 3
-        )
+    num_engines = len(engines)
+    fig_h = max(5, num_engines * 0.75 + 2.5)
+    fig, (ax_nid, ax_teds, ax_mhs) = plt.subplots(
+        1, 3, figsize=(24, fig_h), constrained_layout=True,
     )
-    labels = [e.label for e, *_ in combined]
-    nid = [v or 0.0 for _, v, _, _ in combined]
-    teds = [v or 0.0 for _, _, v, _ in combined]
-    mhs = [v or 0.0 for _, _, _, v in combined]
 
-    n = len(labels)
-    y = np.arange(n)
-    bar_h = 0.25
+    metrics = [
+        (ax_nid, nid_values, "Reading Order (NID)"),
+        (ax_teds, teds_values, "Table Structure (TEDS)"),
+        (ax_mhs, mhs_values, "Heading Hierarchy (MHS)"),
+    ]
 
-    fig_h = max(5, n * 0.75 + 2.5)
-    fig, ax = plt.subplots(figsize=(8, fig_h), constrained_layout=True)
+    for ax, values, title in metrics:
+        sortable = list(zip(engines, values))
+        sortable.sort(key=lambda item: (item[1] is None, -(item[1] or 0.0)))
+        sorted_engines = [e for e, _ in sortable]
+        sorted_values = [v for _, v in sortable]
 
-    bars_nid = ax.barh(y - bar_h, nid, bar_h, label="NID (Reading Order)", color="#4C78A8")
-    bars_teds = ax.barh(y, teds, bar_h, label="TEDS (Table)", color="#59A14F")
-    bars_mhs = ax.barh(y + bar_h, mhs, bar_h, label="MHS (Heading)", color="#E15759")
-
-    for bars, vals in [(bars_nid, nid), (bars_teds, teds), (bars_mhs, mhs)]:
-        for bar, v in zip(bars, vals):
-            ax.annotate(
-                f"{v:.3f}",
-                xy=(bar.get_width(), bar.get_y() + bar.get_height() / 2),
-                xytext=(4, 0),
-                textcoords="offset points",
-                ha="left",
-                va="center",
-                fontsize=12,
-            )
-
-    ax.set_yticks(y)
-    ax.set_yticklabels(labels, fontsize=14)
-    ax.set_xlim(0, 1.15)
-    ax.set_xlabel("Score", fontsize=15)
-    ax.tick_params(axis="x", labelsize=12)
-    ax.invert_yaxis()
-    ax.legend(fontsize=11, loc="upper center", bbox_to_anchor=(0.5, -0.06), ncol=3, columnspacing=1.0)
+        labels = [e.label for e in sorted_engines]
+        clean_values = [v or 0.0 for v in sorted_values]
+        colors = [WINNER_COLOR if i == 0 else OTHER_COLOR for i in range(len(labels))]
+        bars = ax.barh(labels, clean_values, color=colors)
+        _ensure_min_bar_width(bars, sorted_values)
+        _add_value_labels(ax, bars, sorted_values)
+        ax.set_xlim(0, 1.15)
+        ax.set_title(title, fontsize=14)
+        ax.set_xlabel("Score", fontsize=15)
+        ax.invert_yaxis()
+        ax.tick_params(axis="y", labelsize=14)
+        ax.tick_params(axis="x", labelsize=12)
 
     fig.get_layout_engine().set(rect=(0, 0, 1, 0.91))
     fig.suptitle("Structure Quality by Metric", fontsize=24, y=0.998)

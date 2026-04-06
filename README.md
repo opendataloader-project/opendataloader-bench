@@ -38,6 +38,8 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 ![Benchmark](charts/benchmark.png)
 
+![Quality Breakdown](charts/benchmark_quality.png)
+
 Detailed JSON outputs live alongside each engine and capture the exact metric values:
 
 - [prediction/opendataloader/evaluation.json](prediction/opendataloader/evaluation.json)
