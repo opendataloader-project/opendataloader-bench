@@ -44,10 +44,14 @@ Detailed JSON outputs live alongside each engine and capture the exact metric va
 - [prediction/opendataloader-hybrid/evaluation.json](prediction/opendataloader-hybrid/evaluation.json)
 - [prediction/docling/evaluation.json](prediction/docling/evaluation.json)
 - [prediction/marker/evaluation.json](prediction/marker/evaluation.json)
+- [prediction/edgeparse/evaluation.json](prediction/edgeparse/evaluation.json)
+- [prediction/nutrient/evaluation.json](prediction/nutrient/evaluation.json)
 - [prediction/mineru/evaluation.json](prediction/mineru/evaluation.json)
 - [prediction/pymupdf4llm/evaluation.json](prediction/pymupdf4llm/evaluation.json)
-- [prediction/markitdown/evaluation.json](prediction/markitdown/evaluation.json)
+- [prediction/unstructured/evaluation.json](prediction/unstructured/evaluation.json)
 - [prediction/unstructured-hires/evaluation.json](prediction/unstructured-hires/evaluation.json)
+- [prediction/markitdown/evaluation.json](prediction/markitdown/evaluation.json)
+- [prediction/liteparse/evaluation.json](prediction/liteparse/evaluation.json)
 
 ## 3. Metrics
 
