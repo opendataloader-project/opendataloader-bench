@@ -1,0 +1,9 @@
+{
+    "engine_name": "edgeparse",
+    "engine_version": "0.3.0",
+    "processor": "Apple M4",
+    "document_count": 200,
+    "total_elapsed": 7.258204936981201,
+    "elapsed_per_doc": 0.036291024684906005,
+    "date": "2026-04-06"
+}

@@ -1,0 +1,9 @@
+{
+    "engine_name": "unstructured",
+    "engine_version": "0.17.2",
+    "processor": "Apple M4",
+    "document_count": 200,
+    "total_elapsed": 15.460064172744751,
+    "elapsed_per_doc": 0.07730032086372375,
+    "date": "2026-04-06"
+}

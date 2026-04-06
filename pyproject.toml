@@ -1,27 +1,36 @@
 [project]
 name = "opendataloader-bench"
 version = "0.1.0"
-description = "Benchmark for PDF-to-Markdown conversion engines"
+description = "Benchmark for PDF document structure and layout analysis engines"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.13"
 dependencies = [
     "apted>=1.0.3",
     "beautifulsoup4>=4.14.3",
-    "docling>=2.65.0",
     "easyocr>=1.7.2",
     "lxml>=6.0.2",
-    "markitdown[pdf]>=0.1.4",
     "matplotlib>=3.10.8",
-    "opendataloader-pdf[hybrid]>=1.6.2",
     "pdf2image>=1.17.0",
     "py-cpuinfo>=9.0.0",
     "rapidfuzz>=3.14.3",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=9.0.2",
+dev = ["pytest>=9.0.2"]
+# Engine groups (install individually or combine)
+opendataloader = ["opendataloader-pdf[hybrid]>=1.6.2"]
+docling = ["docling>=2.65.0"]
+markitdown = ["markitdown[pdf]>=0.1.4"]
+edgeparse = ["edgeparse"]
+liteparse = ["liteparse"]
+# Convenience groups
+all-safe = [
+    "opendataloader-pdf[hybrid]>=1.6.2",
+    "docling>=2.65.0",
+    "markitdown[pdf]>=0.1.4",
+    "edgeparse",
+    "pypdf",
 ]
 
 [build-system]

@@ -2,9 +2,9 @@
 
 ## 1. About the Project
 
-PDF documents are everywhere, but LLMs can't read them directly. Converting PDFs to Markdown preserves structure (headings, tables, reading order) that helps LLMs understand and answer questions accurately.
+PDF documents are everywhere, but LLMs can't read them directly. Extracting structured content — headings, tables, reading order — from PDFs is essential for RAG pipelines and document processing workflows.
 
-This benchmark compares open-source PDF-to-Markdown engines to help you choose the right tool for your RAG pipeline or document processing workflow.
+This benchmark evaluates document structure and layout analysis engines to help you choose the right tool.
 
 **What we measure:**
 - **Reading Order** — Is the text extracted in the correct sequence?
@@ -15,17 +15,21 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 ## 2. Benchmark Results
 
-### Quick Comparison
+### Quality Comparison
 
-| Engine                      | Overall  | Reading Order | Table    | Heading  | Speed (s/page) |
-|-----------------------------|----------|---------------|----------|----------|----------------|
-| **opendataloader**          | 0.84     | 0.91          | 0.49     | 0.74     | **0.05**       |
-| **opendataloader [hybrid]** | **0.90** | **0.94**      | **0.93** | **0.81** | 0.46           |
-| docling                     | 0.88     | 0.90          | 0.89     | 0.80     | 0.73           |
-| marker                      | 0.86     | 0.89          | 0.81     | 0.80     | 53.93          |
-| mineru                      | 0.83     | 0.86          | 0.87     | 0.74     | 5.96           |
-| pymupdf4llm                 | 0.73     | 0.89          | 0.40     | 0.41     | 0.09           |
-| markitdown                  | 0.58     | 0.88          | 0.00     | 0.00     | **0.04**       |
+| Engine                      | Overall  | Reading Order | Table    | Heading  | Speed (s/page) | License     |
+|-----------------------------|----------|---------------|----------|----------|----------------|-------------|
+| **opendataloader [hybrid]** | **0.90** | **0.94**      | **0.93** | **0.81** | 0.46           | Apache-2.0  |
+| nutrient                    | 0.88     | 0.92          | 0.66     | **0.81** | 0.23           | Proprietary |
+| docling                     | 0.88     | 0.90          | 0.89     | 0.80     | 0.73           | MIT         |
+| marker                      | 0.86     | 0.89          | 0.81     | 0.80     | 53.93          | GPL-3.0     |
+| **opendataloader**          | 0.84     | 0.91          | 0.49     | 0.74     | 0.05           | Apache-2.0  |
+| edgeparse                   | 0.84     | 0.89          | 0.72     | 0.71     | **0.04**       | Apache-2.0  |
+| mineru                      | 0.83     | 0.86          | 0.87     | 0.74     | 5.96           | AGPL-3.0    |
+| pymupdf4llm                 | 0.73     | 0.89          | 0.40     | 0.41     | 0.09           | AGPL-3.0    |
+| unstructured                | 0.69     | 0.88          | 0.00     | 0.39     | 0.08           | Apache-2.0  |
+| markitdown                  | 0.58     | 0.88          | 0.00     | 0.00     | **0.04**       | MIT         |
+| liteparse                   | 0.58     | 0.87          | 0.00     | 0.00     | 1.06           | Apache-2.0  |
 
 > Scores are normalized to [0, 1]. Higher is better for accuracy metrics; lower is better for speed. **Bold** indicates best performance.
 
@@ -36,7 +40,7 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 Detailed JSON outputs live alongside each engine and capture the exact metric values:
 
 - [prediction/opendataloader/evaluation.json](prediction/opendataloader/evaluation.json)
-- [prediction/opendataloader_hybrid/evaluation.json](prediction/opendataloader_hybrid/evaluation.json)
+- [prediction/opendataloader-hybrid/evaluation.json](prediction/opendataloader-hybrid/evaluation.json)
 - [prediction/docling/evaluation.json](prediction/docling/evaluation.json)
 - [prediction/marker/evaluation.json](prediction/marker/evaluation.json)
 - [prediction/mineru/evaluation.json](prediction/mineru/evaluation.json)
@@ -55,7 +59,7 @@ $$
 NID = 1 - \frac{\text{distance}}{\text{len(gt)} + \text{len(pred)}}
 $$
 
-- **NID**: Compares the full Markdown text of the prediction against the ground truth.
+- **NID**: Compares the full extracted text of the prediction against the ground truth.
 - **NID-S**: Strips tables before comparison to focus on narrative reading order.
 
 ### 3.2. Table Structure Similarity (TEDS, TEDS-S)
@@ -69,7 +73,7 @@ $$
 - **TEDS**: Evaluates both structure and cell text.
 - **TEDS-S**: Structure-only, ignoring textual differences (e.g., OCR noise).
 
-### 3.3. Markdown Heading-Level Similarity (MHS, MHS-S)
+### 3.3. Heading-Level Similarity (MHS, MHS-S)
 
 Headings are parsed into a flat list and compared using APTED.
 
@@ -108,36 +112,56 @@ Want to run this benchmark yourself or add a new engine? Follow the steps below.
    git lfs pull
    ```
 
-2. **Install dependencies with uv**:
+2. **Install base dependencies** (evaluation + chart generation only):
    ```sh
    uv sync
    ```
 
+3. **Install engine(s) you want to run**:
+   ```sh
+   # Individual engines
+   uv sync --extra opendataloader
+   uv sync --extra docling
+   uv sync --extra markitdown
+
+   # All permissively-licensed engines at once
+   uv sync --extra all-safe
+   ```
+
+   AGPL/GPL engines (marker, MinerU, PyMuPDF) are not bundled as dependencies — install them separately and the benchmark invokes them via subprocess.
+
    > Don't have uv? See [installation guide](https://docs.astral.sh/uv/getting-started/installation/)
+
+   > **nutrient** is installed separately via npm: `npm install -g @pspdfkit/pdf-to-markdown`
 
 ### Running the Benchmark
 
-#### Option A: One-shot pipeline
+#### Quality Benchmark (default)
 
 ```sh
+# Full pipeline: parse → evaluate → archive → chart
 uv run src/run.py
+
+# Single engine (skips engines that already have evaluation.json)
+uv run src/run.py --engine docling
+
+# Force re-run even if results exist
+uv run src/run.py --engine docling --force
 ```
 
-This runs conversion, evaluation, history archival, and chart generation end-to-end.
-
-#### Option B: Individual stages
+#### Individual Stages
 
 ```sh
-# 1. Convert PDFs to Markdown
+# 1. Parse PDFs
 uv run src/pdf_parser.py
 
 # 2. Evaluate predictions
 uv run src/evaluator.py
 
-# 3. (Optional) Generate charts
+# 3. Generate charts (works with existing evaluation.json data only)
 uv run src/generate_benchmark_chart.py
 
-# 4. (Optional) Archive results
+# 4. Archive results
 uv run src/generate_history.py
 ```
 
@@ -159,7 +183,7 @@ uv run src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
 
 ```
 ├─ charts/                 # Generated benchmark charts
-├─ ground-truth/           # Markdown references and source annotations
+├─ ground-truth/           # Reference annotations and structured ground truth
 ├─ history/                # Archived evaluation results by date
 ├─ pdfs/                   # Input PDF corpus (200 sample documents)
 ├─ prediction/             # Engine outputs grouped by engine/markdown

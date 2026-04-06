@@ -1,4 +1,4 @@
-"""One-shot runner that executes the full PDF-to-Markdown benchmark pipeline."""
+"""One-shot runner that executes the full benchmark pipeline."""
 
 from __future__ import annotations
 
@@ -166,6 +166,18 @@ def print_summary(eval_data: dict) -> None:
     print("=" * 50 + "\n")
 
 
+def _should_skip_engine(engine_name: str, prediction_root: Path, force: bool) -> bool:
+    """Return True if the engine already has evaluation data and --force is not set."""
+    if force:
+        return False
+    eval_path = prediction_root / engine_name / "evaluation.json"
+    if eval_path.is_file():
+        logging.info("Skipping %s (evaluation.json exists, use --force to rerun)", engine_name)
+        return True
+    return False
+
+
+
 def run_pipeline(args: argparse.Namespace) -> Optional[dict]:
     """Execute parsing, evaluation, history archival, and chart generation."""
 
@@ -182,8 +194,12 @@ def run_pipeline(args: argparse.Namespace) -> Optional[dict]:
     if not engines:
         raise ValueError("No engines selected for processing.")
 
+    force = getattr(args, "force", False)
+
     logging.info("Starting PDF parsing for engines: %s", ", ".join(engines))
     for engine_name in engines:
+        if _should_skip_engine(engine_name, prediction_root, force):
+            continue
         logging.info("Processing PDFs with %s", engine_name)
         process_markdown(engine_name, str(input_dir), doc_id=args.doc_id)
 
@@ -359,6 +375,11 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         "--jar-path",
         default=None,
         help="Path to opendataloader-pdf CLI JAR for JAR-based execution (sets OPENDATALOADER_JAR).",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force re-run even if evaluation.json already exists for the engine.",
     )
     return parser.parse_args(argv)
 

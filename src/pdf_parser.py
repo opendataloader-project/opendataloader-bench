@@ -28,7 +28,7 @@ def process_markdown(
     input_dir_name: str,
     doc_id: Optional[str] = None,
 ):
-    """Run PDF-to-Markdown conversion for a single engine.
+    """Run PDF parsing conversion for a single engine.
 
     Creates an output directory, converts all PDFs from the input directory
     to Markdown, and writes a summary file with performance metrics.
@@ -120,7 +120,7 @@ def _parse_args(argv: Optional[List[str]] = None):
 
 
 def main(argv: Optional[List[str]] = None) -> None:
-    """Parse arguments and run the PDF-to-Markdown conversion."""
+    """Parse arguments and run the PDF parsing conversion."""
     args = _parse_args(argv)
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO))
 

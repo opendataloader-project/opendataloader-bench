@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 DEFAULT_PREDICTION_ROOT = Path("prediction")
 DEFAULT_OUTPUT_PATH = Path("charts/benchmark.png")
-MIN_BAR_HEIGHT = 0.01
+MIN_BAR_WIDTH = 0.01
 
 # Colors for accuracy charts
 WINNER_COLOR = "#4C78A8"      # blue for 1st place
@@ -44,11 +44,16 @@ class EngineMetrics:
 
 
 def _load_evaluation_metrics(prediction_root: Path) -> List[EngineMetrics]:
-    """Load aggregated metrics from every engine/version evaluation file."""
+    """Load aggregated metrics from every registered engine's evaluation file."""
+
+    from engine_registry import ALL_CHART_ENGINES
 
     engines: List[EngineMetrics] = []
     for engine_dir in sorted(prediction_root.iterdir()):
         if not engine_dir.is_dir():
+            continue
+        if engine_dir.name not in ALL_CHART_ENGINES:
+            logging.debug("Skipping %s (not in ENGINES registry)", engine_dir.name)
             continue
         evaluation_path = engine_dir / "evaluation.json"
         if not evaluation_path.is_file():
@@ -95,31 +100,31 @@ def _as_float(value: object) -> Optional[float]:
 
 
 def _add_value_labels(ax, bars, values: Sequence[Optional[float]]) -> None:
-    """Annotate bar tops with numeric values."""
+    """Annotate bar ends with numeric values (horizontal bars)."""
 
     for bar, value in zip(bars, values):
         if value is None:
             continue
-        height = bar.get_height()
+        width = bar.get_width()
         ax.annotate(
             f"{value:.2f}",
-            xy=(bar.get_x() + bar.get_width() / 2, height),
-            xytext=(0, 3),
+            xy=(width, bar.get_y() + bar.get_height() / 2),
+            xytext=(4, 0),
             textcoords="offset points",
-            ha="center",
-            va="bottom",
-            fontsize=11,
+            ha="left",
+            va="center",
+            fontsize=10,
         )
 
 
-def _ensure_min_bar_height(bars, values: Sequence[Optional[float]]) -> None:
+def _ensure_min_bar_width(bars, values: Sequence[Optional[float]]) -> None:
     """Ensure visible bars even when the underlying value is zero."""
 
     for bar, value in zip(bars, values):
         if value is None:
             continue
-        if bar.get_height() <= 0:
-            bar.set_height(MIN_BAR_HEIGHT)
+        if bar.get_width() <= 0:
+            bar.set_width(MIN_BAR_WIDTH)
 
 
 def _plot_single_metric(
@@ -128,7 +133,7 @@ def _plot_single_metric(
     values: List[Optional[float]],
     title: str,
 ) -> None:
-    """Plot a single bar chart for one metric."""
+    """Plot a horizontal bar chart for one metric (best at top)."""
 
     sortable = list(zip(engines, values))
     sortable.sort(key=lambda item: (item[1] is None, -(item[1] or 0.0)))
@@ -136,17 +141,16 @@ def _plot_single_metric(
     sorted_values = [value for _, value in sortable]
 
     labels = [engine.label for engine in sorted_engines]
-    index = range(len(labels))
     clean_values = [value or 0.0 for value in sorted_values]
     colors = [WINNER_COLOR if i == 0 else OTHER_COLOR for i in range(len(labels))]
-    bars = ax.bar(labels, clean_values, color=colors)
-    _ensure_min_bar_height(bars, sorted_values)
+    bars = ax.barh(labels, clean_values, color=colors)
+    _ensure_min_bar_width(bars, sorted_values)
     _add_value_labels(ax, bars, sorted_values)
-    ax.set_ylim(0, 1)
+    ax.set_xlim(0, 1.15)
     ax.set_title(title, fontsize=14)
-    ax.set_xticks(list(index))
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=12)
-    ax.set_ylabel("Score", fontsize=12)
+    ax.set_xlabel("Score", fontsize=11)
+    ax.invert_yaxis()
+    ax.tick_params(axis="y", labelsize=10)
 
 
 def _plot_grouped_metric(
@@ -158,7 +162,7 @@ def _plot_grouped_metric(
     primary_label: str,
     secondary_label: str,
 ) -> None:
-    """Plot grouped bars for a pair of related metrics (e.g. TEDS/TEDS-S)."""
+    """Plot grouped horizontal bars for a pair of related metrics (e.g. TEDS/TEDS-S)."""
 
     combined = list(zip(engines, primary, secondary))
     combined.sort(key=lambda item: (item[1] is None, -(item[1] or 0.0)))
@@ -168,38 +172,39 @@ def _plot_grouped_metric(
 
     labels = [engine.label for engine in sorted_engines]
     index = range(len(labels))
-    width = 0.35
+    height = 0.35
 
     primary_values = [value or 0.0 for value in sorted_primary]
     secondary_values = [value or 0.0 for value in sorted_secondary]
 
-    bars1 = ax.bar(
-        [i - width / 2 for i in index],
+    bars1 = ax.barh(
+        [i - height / 2 for i in index],
         primary_values,
-        width,
+        height,
         label=primary_label,
         color="#59A14F",
     )
-    bars2 = ax.bar(
-        [i + width / 2 for i in index],
+    bars2 = ax.barh(
+        [i + height / 2 for i in index],
         secondary_values,
-        width,
+        height,
         label=secondary_label,
         color="#E15759",
     )
 
-    _ensure_min_bar_height(bars1, sorted_primary)
-    _ensure_min_bar_height(bars2, sorted_secondary)
+    _ensure_min_bar_width(bars1, sorted_primary)
+    _ensure_min_bar_width(bars2, sorted_secondary)
 
     _add_value_labels(ax, bars1, sorted_primary)
     _add_value_labels(ax, bars2, sorted_secondary)
 
-    ax.set_ylim(0, 1)
+    ax.set_xlim(0, 1.15)
     ax.set_title(title, fontsize=14)
-    ax.set_ylabel("Score", fontsize=12)
-    ax.set_xticks(list(index))
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=12)
-    ax.legend(fontsize=11)
+    ax.set_xlabel("Score", fontsize=11)
+    ax.set_yticks(list(index))
+    ax.set_yticklabels(labels, fontsize=10)
+    ax.invert_yaxis()
+    ax.legend(fontsize=10)
 
 
 def _plot_time_metric(
@@ -207,7 +212,7 @@ def _plot_time_metric(
     engines: List[EngineMetrics],
     values: List[Optional[float]],
 ) -> None:
-    """Plot extraction time per page."""
+    """Plot extraction time per page as horizontal bars (fastest at top)."""
 
     sortable = list(zip(engines, values))
     sortable.sort(
@@ -220,27 +225,27 @@ def _plot_time_metric(
     sorted_values = [value for _, value in sortable]
 
     labels = [engine.label for engine in sorted_engines]
-    index = range(len(labels))
-    clean_values = [value or 0.0 for value in sorted_values]
+    clean_values = [max(value or 0.001, 0.001) for value in sorted_values]
     colors = [TIME_WINNER_COLOR if i == 0 else TIME_OTHER_COLOR for i in range(len(labels))]
-    bars = ax.bar(labels, clean_values, color=colors)
-    _ensure_min_bar_height(bars, sorted_values)
+    bars = ax.barh(labels, clean_values, color=colors)
     _add_value_labels(ax, bars, sorted_values)
-    ax.set_yscale("log")
+    ax.set_xscale("log")
     ax.set_title("Extraction Time Per Page (s)", fontsize=14)
-    ax.set_ylabel("Seconds (log scale)", fontsize=12)
-    ax.set_xticks(list(index))
-    ax.set_xticklabels(labels, rotation=30, ha="right", fontsize=12)
+    ax.set_xlabel("Seconds (log scale)", fontsize=11)
+    ax.invert_yaxis()
+    ax.tick_params(axis="y", labelsize=10)
 
 
 def _save_individual_chart(
     plotter: Callable[..., None],
     plot_args: Sequence[object],
     output_path: Path,
+    num_engines: int = 7,
 ) -> None:
     """Render and persist a single chart using an existing plotting helper."""
 
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig_height = max(4, num_engines * 0.45 + 1)
+    fig, ax = plt.subplots(figsize=(8, fig_height))
     plotter(ax, *plot_args)
     fig.tight_layout()
     fig.savefig(output_path, dpi=200)
@@ -263,7 +268,9 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
     )
 
     plt.style.use("ggplot")
-    fig, axes = plt.subplots(3, 2, figsize=(12, 10), constrained_layout=True)
+    num_engines = len(engines)
+    fig_height = max(12, num_engines * 1.5 + 4)
+    fig, axes = plt.subplots(3, 2, figsize=(16, fig_height), constrained_layout=True)
 
     overall_values = [engine.overall for engine in engines]
     nid_values = [engine.nid for engine in engines]
@@ -308,7 +315,7 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
     axes[2, 1].axis("off")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.suptitle("PDF-to-Markdown Benchmark", fontsize=18)
+    fig.suptitle("PDF Document Structure Benchmark", fontsize=18)
     fig.savefig(output_path, dpi=200)
     plt.close(fig)
 
@@ -346,7 +353,7 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
 
     for suffix_name, plotter, plot_args in chart_specs:
         individual_path = output_path.parent / f"{stem}_{suffix_name}{suffix}"
-        _save_individual_chart(plotter, plot_args, individual_path)
+        _save_individual_chart(plotter, plot_args, individual_path, num_engines=len(engines))
 
     return output_path
 
