@@ -1,9 +1,9 @@
 {
     "engine_name": "docling",
-    "engine_version": "2.65.0",
+    "engine_version": "2.84.0",
     "processor": "Apple M4",
     "document_count": 200,
-    "total_elapsed": 145.02086925506592,
-    "elapsed_per_doc": 0.7251043462753296,
-    "date": "2025-12-20"
+    "total_elapsed": 152.44246816635132,
+    "elapsed_per_doc": 0.7622123408317566,
+    "date": "2026-04-06"
 }

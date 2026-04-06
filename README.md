@@ -19,17 +19,17 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 | Engine                      | Overall  | Reading Order | Table    | Heading  | Speed (s/page) | License     |
 |-----------------------------|----------|---------------|----------|----------|----------------|-------------|
-| **opendataloader [hybrid]** | **0.90** | **0.94**      | **0.93** | **0.81** | 0.46           | Apache-2.0  |
-| nutrient                    | 0.88     | 0.92          | 0.66     | **0.81** | 0.23           | Proprietary |
-| docling                     | 0.88     | 0.90          | 0.89     | 0.80     | 0.73           | MIT         |
+| **opendataloader [hybrid]** | **0.91** | **0.93**      | **0.93** | **0.82** | 0.46           | Apache-2.0  |
+| docling                     | 0.88     | 0.90          | 0.89     | **0.82** | 0.76           | MIT         |
+| nutrient                    | 0.88     | 0.92          | 0.66     | 0.81     | 0.23           | Proprietary |
 | marker                      | 0.86     | 0.89          | 0.81     | 0.80     | 53.93          | GPL-3.0     |
-| **opendataloader**          | 0.84     | 0.91          | 0.49     | 0.74     | 0.05           | Apache-2.0  |
 | edgeparse                   | 0.84     | 0.89          | 0.72     | 0.71     | **0.04**       | Apache-2.0  |
 | unstructured [hi_res]       | 0.84     | 0.90          | 0.59     | 0.75     | 3.01           | Apache-2.0  |
+| **opendataloader**          | 0.83     | 0.90          | 0.49     | 0.74     | 0.02           | Apache-2.0  |
 | mineru                      | 0.83     | 0.86          | 0.87     | 0.74     | 5.96           | AGPL-3.0    |
 | pymupdf4llm                 | 0.73     | 0.89          | 0.40     | 0.41     | 0.09           | AGPL-3.0    |
 | unstructured                | 0.69     | 0.88          | 0.00     | 0.39     | 0.08           | Apache-2.0  |
-| markitdown                  | 0.58     | 0.88          | 0.00     | 0.00     | **0.04**       | MIT         |
+| markitdown                  | 0.59     | 0.84          | 0.27     | 0.00     | 0.11           | MIT         |
 | liteparse                   | 0.58     | 0.87          | 0.00     | 0.00     | 1.06           | Apache-2.0  |
 
 > Scores are normalized to [0, 1]. Higher is better for accuracy metrics; lower is better for speed. **Bold** indicates best performance.

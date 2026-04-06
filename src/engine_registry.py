@@ -9,12 +9,12 @@ EngineHandler = Callable[..., None]
 
 # Runnable engines — have parser code in this repo.
 ENGINES: Dict[str, str] = {
-    "opendataloader": "2.2.0",
-    "opendataloader-hybrid": "2.1.1",
-    "opendataloader-hybrid-docling-fast": "2.1.1",
-    "opendataloader-hybrid-hancom": "2.1.1",
-    "docling": "2.82.0",
-    "markitdown": "0.1.4",
+    "opendataloader": "2.2.1",
+    "opendataloader-hybrid": "2.2.1",
+    "opendataloader-hybrid-docling-fast": "2.2.1",
+    "opendataloader-hybrid-hancom": "2.2.1",
+    "docling": "2.84.0",
+    "markitdown": "0.1.5",
     "unstructured": "0.17.2",
     "unstructured-hires": "0.17.2",
     "edgeparse": "0.3.0",
