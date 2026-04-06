@@ -15,28 +15,38 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 ## 2. Benchmark Results
 
-### Quick Comparison
+### Quality Comparison (Markdown-capable engines)
 
-| Engine                      | Overall  | Reading Order | Table    | Heading  | Speed (s/page) |
-|-----------------------------|----------|---------------|----------|----------|----------------|
-| **opendataloader**          | 0.84     | 0.91          | 0.49     | 0.74     | **0.05**       |
-| **opendataloader [hybrid]** | **0.90** | **0.94**      | **0.93** | **0.81** | 0.46           |
-| docling                     | 0.88     | 0.90          | 0.89     | 0.80     | 0.73           |
-| marker                      | 0.86     | 0.89          | 0.81     | 0.80     | 53.93          |
-| mineru                      | 0.83     | 0.86          | 0.87     | 0.74     | 5.96           |
-| pymupdf4llm                 | 0.73     | 0.89          | 0.40     | 0.41     | 0.09           |
-| markitdown                  | 0.58     | 0.88          | 0.00     | 0.00     | **0.04**       |
+| Engine                      | Overall  | Reading Order | Table    | Heading  | Speed (s/page) | License    |
+|-----------------------------|----------|---------------|----------|----------|----------------|------------|
+| **opendataloader [hybrid]** | **0.90** | **0.94**      | **0.93** | **0.81** | 0.46           | Apache-2.0 |
+| docling                     | 0.88     | 0.90          | 0.89     | 0.80     | 0.73           | MIT        |
+| marker                      | 0.86     | 0.89          | 0.81     | 0.80     | 53.93          | GPL-3.0    |
+| **opendataloader**          | 0.84     | 0.91          | 0.49     | 0.74     | **0.05**       | Apache-2.0 |
+| mineru                      | 0.83     | 0.86          | 0.87     | 0.74     | 5.96           | AGPL-3.0   |
+| pymupdf4llm                 | 0.73     | 0.89          | 0.40     | 0.41     | 0.09           | AGPL-3.0   |
+| markitdown                  | 0.58     | 0.88          | 0.00     | 0.00     | **0.04**       | MIT        |
+| unstructured                | —        | —             | —        | —        | —              | Apache-2.0 |
+| edgeparse                   | —        | —             | —        | —        | —              | Apache-2.0 |
+| nutrient                    | —        | —             | —        | —        | —              | Proprietary |
 
-> Scores are normalized to [0, 1]. Higher is better for accuracy metrics; lower is better for speed. **Bold** indicates best performance.
+> Scores are normalized to [0, 1]. Higher is better for accuracy metrics; lower is better for speed. **Bold** indicates best performance. "—" indicates pending benchmark run.
 
 ### Visual Comparison
 
 ![Benchmark Chart](charts/benchmark.png)
 
+### License Notes
+
+Some engines have restrictive licenses that affect how they can be used:
+- **AGPL-3.0** (MinerU, PyMuPDF): Copyleft; this benchmark invokes them via subprocess only.
+- **GPL-3.0** (marker): Copyleft; model weights have additional commercial restrictions.
+- **Proprietary** (nutrient/PSPDFKit): Free up to 1,000 docs/month; not bundled as a dependency.
+
 Detailed JSON outputs live alongside each engine and capture the exact metric values:
 
 - [prediction/opendataloader/evaluation.json](prediction/opendataloader/evaluation.json)
-- [prediction/opendataloader_hybrid/evaluation.json](prediction/opendataloader_hybrid/evaluation.json)
+- [prediction/opendataloader-hybrid/evaluation.json](prediction/opendataloader-hybrid/evaluation.json)
 - [prediction/docling/evaluation.json](prediction/docling/evaluation.json)
 - [prediction/marker/evaluation.json](prediction/marker/evaluation.json)
 - [prediction/mineru/evaluation.json](prediction/mineru/evaluation.json)
@@ -108,24 +118,60 @@ Want to run this benchmark yourself or add a new engine? Follow the steps below.
    git lfs pull
    ```
 
-2. **Install dependencies with uv**:
+2. **Install base dependencies** (evaluation + chart generation only):
    ```sh
    uv sync
    ```
 
+3. **Install engine(s) you want to run**:
+   ```sh
+   # Individual engines
+   uv sync --extra opendataloader
+   uv sync --extra docling
+   uv sync --extra markitdown
+
+   # All permissively-licensed engines at once
+   uv sync --extra all-safe
+
+   # AGPL/GPL engines (subprocess-only usage)
+   uv sync --extra marker
+   uv sync --extra mineru
+   uv sync --extra pymupdf
+   ```
+
    > Don't have uv? See [installation guide](https://docs.astral.sh/uv/getting-started/installation/)
+
+   > **nutrient** is installed separately via npm: `npm install -g @pspdfkit/pdf-to-markdown`
 
 ### Running the Benchmark
 
-#### Option A: One-shot pipeline
+#### Quality Benchmark (default)
 
 ```sh
+# Full pipeline: parse → evaluate → archive → chart
 uv run src/run.py
+
+# Single engine (skips engines that already have evaluation.json)
+uv run src/run.py --engine docling
+
+# Force re-run even if results exist
+uv run src/run.py --engine docling --force
 ```
 
-This runs conversion, evaluation, history archival, and chart generation end-to-end.
+#### Speed Benchmark
 
-#### Option B: Individual stages
+```sh
+# Run speed benchmark (latency + memory)
+uv run src/run.py --mode speed
+
+# With options
+uv run src/run.py --mode speed --iterations 10 --warmup 1
+
+# Both quality and speed
+uv run src/run.py --mode all
+```
+
+#### Individual Stages
 
 ```sh
 # 1. Convert PDFs to Markdown
@@ -134,10 +180,10 @@ uv run src/pdf_parser.py
 # 2. Evaluate predictions
 uv run src/evaluator.py
 
-# 3. (Optional) Generate charts
+# 3. Generate charts (works with existing evaluation.json data only)
 uv run src/generate_benchmark_chart.py
 
-# 4. (Optional) Archive results
+# 4. Archive results
 uv run src/generate_history.py
 ```
 
@@ -163,7 +209,11 @@ uv run src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
 ├─ history/                # Archived evaluation results by date
 ├─ pdfs/                   # Input PDF corpus (200 sample documents)
 ├─ prediction/             # Engine outputs grouped by engine/markdown
+├─ speed_benchmark_data/   # PDF corpus for speed benchmark
+├─ speed_results/          # Speed benchmark JSON results
 ├─ src/                    # Conversion, evaluation, and utility scripts
+│   ├─ speed_benchmark/    # Speed benchmark module (latency + memory)
+│   └─ ...                 # Quality evaluation scripts
 └─ pyproject.toml          # Python dependencies (uv)
 ```
 

@@ -8,20 +8,36 @@ requires-python = ">=3.13"
 dependencies = [
     "apted>=1.0.3",
     "beautifulsoup4>=4.14.3",
-    "docling>=2.65.0",
     "easyocr>=1.7.2",
     "lxml>=6.0.2",
-    "markitdown[pdf]>=0.1.4",
     "matplotlib>=3.10.8",
-    "opendataloader-pdf[hybrid]>=1.6.2",
     "pdf2image>=1.17.0",
     "py-cpuinfo>=9.0.0",
     "rapidfuzz>=3.14.3",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=9.0.2",
+dev = ["pytest>=9.0.2"]
+# Engine groups (install individually or combine)
+opendataloader = ["opendataloader-pdf[hybrid]>=1.6.2"]
+docling = ["docling>=2.65.0"]
+markitdown = ["markitdown[pdf]>=0.1.4"]
+unstructured = ["unstructured[pdf]"]
+edgeparse = ["edgeparse"]
+# AGPL/GPL engines — subprocess-only usage
+marker = ["marker-pdf"]
+mineru = ["magic-pdf"]
+pymupdf = ["pymupdf4llm"]
+# Text-only / speed benchmark
+pypdf = ["pypdf"]
+liteparse = ["liteparse"]
+# Convenience groups
+all-safe = [
+    "opendataloader-pdf[hybrid]>=1.6.2",
+    "docling>=2.65.0",
+    "markitdown[pdf]>=0.1.4",
+    "edgeparse",
+    "pypdf",
 ]
 
 [build-system]

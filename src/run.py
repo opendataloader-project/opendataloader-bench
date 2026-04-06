@@ -166,6 +166,38 @@ def print_summary(eval_data: dict) -> None:
     print("=" * 50 + "\n")
 
 
+def _should_skip_engine(engine_name: str, prediction_root: Path, force: bool) -> bool:
+    """Return True if the engine already has evaluation data and --force is not set."""
+    if force:
+        return False
+    eval_path = prediction_root / engine_name / "evaluation.json"
+    if eval_path.is_file():
+        logging.info("Skipping %s (evaluation.json exists, use --force to rerun)", engine_name)
+        return True
+    return False
+
+
+def run_speed_pipeline(args: argparse.Namespace) -> None:
+    """Execute the speed benchmark pipeline."""
+    project_root = Path(__file__).parent.parent.resolve()
+
+    import sys
+    sys.path.insert(0, str(project_root / "src"))
+    from speed_benchmark.main import main as speed_main
+
+    speed_argv = []
+    if hasattr(args, "speed_pdf") and args.speed_pdf:
+        speed_argv.extend(["--pdf", str(_resolve_path(args.speed_pdf, project_root))])
+    if hasattr(args, "iterations") and args.iterations:
+        speed_argv.extend(["--iterations", str(args.iterations)])
+    if hasattr(args, "warmup") and args.warmup:
+        speed_argv.extend(["--warmup", str(args.warmup)])
+    if hasattr(args, "speed_parsers") and args.speed_parsers:
+        speed_argv.extend(["--parsers", args.speed_parsers])
+
+    speed_main(speed_argv if speed_argv else None)
+
+
 def run_pipeline(args: argparse.Namespace) -> Optional[dict]:
     """Execute parsing, evaluation, history archival, and chart generation."""
 
@@ -182,8 +214,12 @@ def run_pipeline(args: argparse.Namespace) -> Optional[dict]:
     if not engines:
         raise ValueError("No engines selected for processing.")
 
+    force = getattr(args, "force", False)
+
     logging.info("Starting PDF parsing for engines: %s", ", ".join(engines))
     for engine_name in engines:
+        if _should_skip_engine(engine_name, prediction_root, force):
+            continue
         logging.info("Processing PDFs with %s", engine_name)
         process_markdown(engine_name, str(input_dir), doc_id=args.doc_id)
 
@@ -360,6 +396,40 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         default=None,
         help="Path to opendataloader-pdf CLI JAR for JAR-based execution (sets OPENDATALOADER_JAR).",
     )
+    parser.add_argument(
+        "--mode",
+        choices=["quality", "speed", "all"],
+        default="quality",
+        help="Benchmark mode: quality (default), speed, or all.",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force re-run even if evaluation.json already exists for the engine.",
+    )
+    # Speed benchmark options
+    parser.add_argument(
+        "--speed-pdf",
+        default=None,
+        help="PDF file for speed benchmark (default: speed_benchmark_data/GPO-911REPORT.pdf).",
+    )
+    parser.add_argument(
+        "--iterations",
+        type=int,
+        default=None,
+        help="Number of timed iterations for speed benchmark (default: 10).",
+    )
+    parser.add_argument(
+        "--warmup",
+        type=int,
+        default=None,
+        help="Number of warmup runs for speed benchmark (default: 1).",
+    )
+    parser.add_argument(
+        "--speed-parsers",
+        default=None,
+        help="Comma-separated list of parser names for speed benchmark (default: all available).",
+    )
     return parser.parse_args(argv)
 
 
@@ -367,16 +437,23 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     args = _parse_args(argv)
     logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO))
     try:
-        eval_data = run_pipeline(args)
+        mode = getattr(args, "mode", "quality")
 
-        if eval_data:
-            print_summary(eval_data)
+        if mode in ("quality", "all"):
+            eval_data = run_pipeline(args)
 
-        if args.check_regression and eval_data:
-            project_root = Path(__file__).parent.parent.resolve()
-            thresholds_path = _resolve_path(args.thresholds, project_root)
-            if not check_regression(eval_data, thresholds_path):
-                raise SystemExit(1)
+            if eval_data:
+                print_summary(eval_data)
+
+            if args.check_regression and eval_data:
+                project_root = Path(__file__).parent.parent.resolve()
+                thresholds_path = _resolve_path(args.thresholds, project_root)
+                if not check_regression(eval_data, thresholds_path):
+                    raise SystemExit(1)
+
+        if mode in ("speed", "all"):
+            logging.info("Running speed benchmark...")
+            run_speed_pipeline(args)
 
     except Exception as exc:  # pragma: no cover - CLI entry point
         logging.error("Pipeline failed: %s", exc)

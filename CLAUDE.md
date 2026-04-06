@@ -4,14 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a benchmark suite for evaluating PDF-to-Markdown conversion engines. It measures reading order accuracy, table fidelity, and heading hierarchy preservation across multiple parsing engines (opendataloader, docling, markitdown).
+This is a benchmark suite for evaluating PDF-to-Markdown conversion engines. It measures reading order accuracy (NID), table fidelity (TEDS), heading hierarchy preservation (MHS), and extraction speed across 12 parsing engines.
 
 ## Commands
 
 ### Full Pipeline
 ```sh
-uv run src/run.py                    # Run complete benchmark: parse → evaluate → archive → chart
-uv run src/run.py --engine docling   # Run for single engine
+uv run src/run.py                          # Quality benchmark (parse → evaluate → archive → chart)
+uv run src/run.py --engine docling         # Single engine (skips if evaluation.json exists)
+uv run src/run.py --engine docling --force # Force re-run
+uv run src/run.py --mode speed             # Speed benchmark only
+uv run src/run.py --mode all               # Both quality and speed
 ```
 
 ### CI Mode (used by opendataloader-pdf CI)
@@ -23,14 +26,8 @@ OPENDATALOADER_JAR=/path/to/jar uv run src/run.py --engine opendataloader --chec
 ```sh
 uv run src/pdf_parser.py             # Convert PDFs to Markdown (all engines)
 uv run src/evaluator.py              # Evaluate predictions against ground truth
-uv run src/generate_benchmark_chart.py  # Generate comparison charts
+uv run src/generate_benchmark_chart.py  # Generate comparison charts (no engine deps needed)
 uv run src/generate_history.py       # Archive evaluation results
-```
-
-### Targeting Specific Documents
-```sh
-uv run src/pdf_parser.py --engine opendataloader --doc-id 01030000000001
-uv run src/evaluator.py --engine opendataloader --doc-id 01030000000001
 ```
 
 ### Tests
@@ -41,38 +38,47 @@ uv run pytest tests/test_evaluator_table.py  # Single test file
 
 ## Architecture
 
+### Dependency Strategy
+Engine libraries are **optional dependencies** to avoid conflicts. Base deps (apted, matplotlib, rapidfuzz, etc.) are always installed for evaluation/charting. Each engine is a separate optional group:
+```sh
+uv sync --extra opendataloader   # Install one engine
+uv sync --extra all-safe         # All permissive-license engines
+```
+Chart generation works with base deps only (reads evaluation.json files).
+
+### Engine Registry (engine_registry.py)
+Uses **lazy imports** via `get_engine_handler()`. Engines not installed are gracefully skipped. `ENGINE_DISPATCH` is a `_LazyDispatch` dict for backward compatibility.
+
+### Adding a New Engine
+1. Create `src/pdf_parser_<name>.py` with `to_markdown(document_paths, input_path, output_dir)` function
+2. Add to `ENGINES` and `_ENGINE_MODULES` dicts in `engine_registry.py`
+3. Add optional dependency group in `pyproject.toml`
+4. For speed benchmark: add parser class in `src/speed_benchmark/parsers/<name>.py`
+
 ### Pipeline Flow
-1. **pdf_parser.py** - Orchestrates PDF→Markdown conversion, dispatches to engine-specific handlers
-2. **engine_registry.py** - Central registry mapping engine names to versions and handler functions
-3. **evaluator.py** - Runs all metric evaluators and produces `evaluation.json` per engine
+1. **pdf_parser.py** → dispatches to engine-specific handlers via lazy import
+2. **evaluator.py** → runs NID/TEDS/MHS evaluators, produces `evaluation.json`
+3. **generate_benchmark_chart.py** → horizontal bar charts from evaluation.json (filtered by ENGINES registry)
+4. **run.py** → orchestrates quality/speed/all modes with skip logic
 
-### Engine Handlers
-Located in `src/pdf_parser_*.py`. Each implements a `to_markdown(document_paths, input_path, output_dir)` function. To add a new engine:
-1. Create `src/pdf_parser_<name>.py` with `to_markdown()` function
-2. Register in `engine_registry.py` (ENGINES dict + ENGINE_DISPATCH dict)
+### Speed Benchmark (src/speed_benchmark/)
+Migrated from odl-speed-benchmark. Measures latency and peak memory using tracemalloc.
+- `runner.py` — core measurement loop with warmup
+- `report.py` — chart generation + JSON output
+- `parsers/` — lazy-loaded parser registry
 
-### Evaluation Metrics
-Each evaluator returns `(score, structure_only_score)` tuples:
-- **evaluator_reading_order.py** - NID/NID-S using normalized Indel distance (rapidfuzz)
-- **evaluator_table.py** - TEDS/TEDS-S using tree edit distance (APTED algorithm)
-- **evaluator_heading_level.py** - MHS/MHS-S comparing heading structure trees
-- **evaluator_table_detection.py** - Binary classification of table presence (precision/recall/F1)
-- **evaluator_triage.py** - Page triage decisions for hybrid mode
-
-### Shared Utility
-**converter_markdown_table.py** - Converts Markdown tables to HTML for consistent evaluation across all metrics.
-
-### Updating Benchmark Results
-When re-running benchmarks with a new engine version:
-1. Update version strings in `engine_registry.py`
-2. Run the benchmark (e.g. `uv run src/run.py --engine opendataloader`)
-3. Update `thresholds.json` to match the new measured values (nid, teds, mhs, etc.)
-4. Update the results table in `README.md`
+### License Tiers
+- **Safe** (direct import): opendataloader, docling, markitdown, unstructured, edgeparse, pypdf, liteparse
+- **AGPL/GPL** (subprocess only): MinerU, PyMuPDF, marker
+- **Proprietary** (CLI only, not in deps): nutrient/PSPDFKit
 
 ### Directory Structure
-- `pdfs/` - Input PDF corpus (200 documents)
-- `ground-truth/markdown/` - Reference Markdown files
-- `prediction/<engine>/markdown/` - Engine outputs
-- `prediction/<engine>/evaluation.json` - Evaluation results
-- `history/<yymmdd>/` - Archived evaluation snapshots
-- `charts/` - Generated benchmark visualizations
+- `pdfs/` — Input PDF corpus (200 documents)
+- `ground-truth/markdown/` — Reference Markdown files
+- `prediction/<engine>/markdown/` — Engine outputs
+- `prediction/<engine>/evaluation.json` — Evaluation results
+- `history/<yymmdd>/` — Archived evaluation snapshots
+- `charts/` — Generated benchmark visualizations
+- `src/speed_benchmark/` — Speed benchmark module
+- `speed_benchmark_data/` — PDF corpus for speed tests
+- `speed_results/` — Speed benchmark JSON results
