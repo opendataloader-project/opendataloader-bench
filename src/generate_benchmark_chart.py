@@ -113,7 +113,7 @@ def _add_value_labels(ax, bars, values: Sequence[Optional[float]]) -> None:
             textcoords="offset points",
             ha="left",
             va="center",
-            fontsize=10,
+            fontsize=13,
         )
 
 
@@ -147,10 +147,10 @@ def _plot_single_metric(
     _ensure_min_bar_width(bars, sorted_values)
     _add_value_labels(ax, bars, sorted_values)
     ax.set_xlim(0, 1.15)
-    ax.set_title(title, fontsize=14)
-    ax.set_xlabel("Score", fontsize=11)
+    ax.set_title(title, fontsize=14) if title else None
+    ax.set_xlabel("Score", fontsize=15)
     ax.invert_yaxis()
-    ax.tick_params(axis="y", labelsize=10)
+    ax.tick_params(axis="y", labelsize=14)
 
 
 def _plot_grouped_metric(
@@ -230,27 +230,99 @@ def _plot_time_metric(
     bars = ax.barh(labels, clean_values, color=colors)
     _add_value_labels(ax, bars, sorted_values)
     ax.set_xscale("log")
-    ax.set_title("Extraction Time Per Page (s)", fontsize=14)
-    ax.set_xlabel("Seconds (log scale)", fontsize=11)
+    ax.set_xlabel("Seconds (log scale)", fontsize=15)
     ax.invert_yaxis()
-    ax.tick_params(axis="y", labelsize=10)
+    ax.tick_params(axis="y", labelsize=14)
 
 
 def _save_individual_chart(
     plotter: Callable[..., None],
     plot_args: Sequence[object],
+    title: str,
     output_path: Path,
     num_engines: int = 7,
 ) -> None:
     """Render and persist a single chart using an existing plotting helper."""
 
-    fig_height = max(4, num_engines * 0.45 + 1)
-    fig, ax = plt.subplots(figsize=(8, fig_height))
+    fig_height = max(5, num_engines * 0.75 + 2.5)
+    fig, ax = plt.subplots(figsize=(8, fig_height), constrained_layout=True)
     plotter(ax, *plot_args)
-    fig.tight_layout()
+    ax.set_xlabel(ax.get_xlabel(), fontsize=15)
+    ax.tick_params(axis="y", labelsize=14)
+    ax.tick_params(axis="x", labelsize=12)
+    fig.get_layout_engine().set(rect=(0, 0, 1, 0.91))
+    fig.suptitle(title, fontsize=24, y=0.998)
+    fig.text(
+        0.5, 0.955,
+        "200 pages \u00b7 Apple M4 \u00b7 32GB",
+        ha="center", va="top", fontsize=15, color="gray",
+        transform=fig.transFigure,
+    )
     fig.savefig(output_path, dpi=200)
     plt.close(fig)
     logging.info("Saved individual chart to %s", output_path)
+
+
+def _save_grouped_quality_chart(
+    engines: List[EngineMetrics],
+    nid_values: List[Optional[float]],
+    teds_values: List[Optional[float]],
+    mhs_values: List[Optional[float]],
+    output_path: Path,
+) -> None:
+    """Grouped horizontal bar chart with NID, TEDS, MHS per engine."""
+
+    import numpy as np
+
+    # Sort by average of the three metrics (best on top)
+    combined = list(zip(engines, nid_values, teds_values, mhs_values))
+    combined.sort(
+        key=lambda item: -(
+            ((item[1] or 0) + (item[2] or 0) + (item[3] or 0)) / 3
+        )
+    )
+    labels = [e.label for e, *_ in combined]
+    nid = [v or 0.0 for _, v, _, _ in combined]
+    teds = [v or 0.0 for _, _, v, _ in combined]
+    mhs = [v or 0.0 for _, _, _, v in combined]
+
+    n = len(labels)
+    y = np.arange(n)
+    bar_h = 0.25
+
+    fig_h = max(5, n * 0.75 + 2.5)
+    fig, ax = plt.subplots(figsize=(8, fig_h), constrained_layout=True)
+
+    bars_nid = ax.barh(y - bar_h, nid, bar_h, label="NID (Reading Order)", color="#4C78A8")
+    bars_teds = ax.barh(y, teds, bar_h, label="TEDS (Table)", color="#59A14F")
+    bars_mhs = ax.barh(y + bar_h, mhs, bar_h, label="MHS (Heading)", color="#E15759")
+
+    for bars, vals in [(bars_nid, nid), (bars_teds, teds), (bars_mhs, mhs)]:
+        for bar, v in zip(bars, vals):
+            ax.annotate(
+                f"{v:.2f}",
+                xy=(bar.get_width(), bar.get_y() + bar.get_height() / 2),
+                xytext=(4, 0),
+                textcoords="offset points",
+                ha="left",
+                va="center",
+                fontsize=12,
+            )
+
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels, fontsize=14)
+    ax.set_xlim(0, 1.15)
+    ax.set_xlabel("Score", fontsize=15)
+    ax.tick_params(axis="x", labelsize=12)
+    ax.invert_yaxis()
+    ax.legend(fontsize=11, loc="upper center", bbox_to_anchor=(0.5, -0.06), ncol=3, columnspacing=1.0)
+
+    fig.get_layout_engine().set(rect=(0, 0, 1, 0.91))
+    fig.suptitle("Structure Quality by Metric", fontsize=24, y=0.998)
+    fig.text(0.5, 0.955, "200 pages \u00b7 Apple M4 \u00b7 32GB", ha="center", va="top", fontsize=15, color="gray", transform=fig.transFigure)
+    fig.savefig(output_path, dpi=200)
+    plt.close(fig)
+    logging.info("Saved quality chart to %s", output_path)
 
 
 def generate_charts(prediction_root: Path, output_path: Path) -> Path:
@@ -269,8 +341,6 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
 
     plt.style.use("ggplot")
     num_engines = len(engines)
-    fig_height = max(12, num_engines * 1.5 + 4)
-    fig, axes = plt.subplots(3, 2, figsize=(16, fig_height), constrained_layout=True)
 
     overall_values = [engine.overall for engine in engines]
     nid_values = [engine.nid for engine in engines]
@@ -278,82 +348,60 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
     mhs_values = [engine.mhs for engine in engines]
     elapsed_values = [engine.elapsed_per_page for engine in engines]
 
-    _plot_single_metric(
-        axes[0, 0],
-        engines,
-        overall_values,
-        "Extraction Accuracy",
-    )
-
-    _plot_time_metric(
-        axes[0, 1],
-        engines,
-        elapsed_values,
-    )
-
-    _plot_single_metric(
-        axes[1, 0],
-        engines,
-        nid_values,
-        "Reading Order (NID)",
-    )
-
-    _plot_single_metric(
-        axes[1, 1],
-        engines,
-        teds_values,
-        "Table Structure (TEDS)",
-    )
-
-    _plot_single_metric(
-        axes[2, 0],
-        engines,
-        mhs_values,
-        "Heading Level (MHS)",
-    )
-
-    axes[2, 1].axis("off")
-
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.suptitle("PDF Document Structure Benchmark", fontsize=18)
-    fig.savefig(output_path, dpi=200)
-    plt.close(fig)
-
-    logging.info("Saved benchmark chart to %s", output_path)
-
     suffix = "".join(output_path.suffixes) or ".png"
     stem = output_path.stem
-    chart_specs: List[Tuple[str, Callable[..., None], Tuple[object, ...]]] = [
-        (
-            "overall",
-            _plot_single_metric,
-            (engines, overall_values, "Extraction Accuracy"),
-        ),
+
+    # --- Chart 1: Overall accuracy ---
+    overall_path = output_path.parent / f"{stem}_overall{suffix}"
+    _save_individual_chart(
+        _plot_single_metric,
+        (engines, overall_values, ""),
+        "Extraction Accuracy",
+        overall_path,
+        num_engines=num_engines,
+    )
+    logging.info("Saved overall chart to %s", overall_path)
+
+    # --- Chart 2: Grouped NID / TEDS / MHS ---
+    _save_grouped_quality_chart(
+        engines, nid_values, teds_values, mhs_values,
+        output_path.parent / f"{stem}_quality{suffix}",
+    )
+
+    logging.info("Saved benchmark charts")
+
+    # Individual metric charts
+    chart_specs: List[Tuple[str, str, Callable[..., None], Tuple[object, ...]]] = [
         (
             "reading-order",
+            "Reading Order (NID)",
             _plot_single_metric,
-            (engines, nid_values, "Reading Order (NID)"),
+            (engines, nid_values, ""),
         ),
         (
             "table-structure",
+            "Table Structure (TEDS)",
             _plot_single_metric,
-            (engines, teds_values, "Table Structure (TEDS)"),
+            (engines, teds_values, ""),
         ),
         (
             "heading-level",
+            "Heading Level (MHS)",
             _plot_single_metric,
-            (engines, mhs_values, "Heading Level (MHS)"),
+            (engines, mhs_values, ""),
         ),
         (
             "extraction-time",
+            "Extraction Time Per Page",
             _plot_time_metric,
             (engines, elapsed_values),
         ),
     ]
 
-    for suffix_name, plotter, plot_args in chart_specs:
+    for suffix_name, title, plotter, plot_args in chart_specs:
         individual_path = output_path.parent / f"{stem}_{suffix_name}{suffix}"
-        _save_individual_chart(plotter, plot_args, individual_path, num_engines=len(engines))
+        _save_individual_chart(plotter, plot_args, title, individual_path, num_engines=num_engines)
 
     return output_path
 

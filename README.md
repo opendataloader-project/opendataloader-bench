@@ -35,7 +35,11 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 ### Visual Comparison
 
-![Benchmark Chart](charts/benchmark.png)
+<img src="charts/benchmark_overall.png" alt="Extraction Accuracy" width="500">
+
+<img src="charts/benchmark_quality.png" alt="Structure Quality by Metric" width="500">
+
+<img src="charts/benchmark_extraction-time.png" alt="Extraction Time Per Page" width="500">
 
 Detailed JSON outputs live alongside each engine and capture the exact metric values:
 
