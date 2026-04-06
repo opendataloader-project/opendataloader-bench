@@ -107,7 +107,7 @@ def _add_value_labels(ax, bars, values: Sequence[Optional[float]]) -> None:
             continue
         width = bar.get_width()
         ax.annotate(
-            f"{value:.2f}",
+            f"{value:.3f}",
             xy=(width, bar.get_y() + bar.get_height() / 2),
             xytext=(4, 0),
             textcoords="offset points",
@@ -300,7 +300,7 @@ def _save_grouped_quality_chart(
     for bars, vals in [(bars_nid, nid), (bars_teds, teds), (bars_mhs, mhs)]:
         for bar, v in zip(bars, vals):
             ax.annotate(
-                f"{v:.2f}",
+                f"{v:.3f}",
                 xy=(bar.get_width(), bar.get_y() + bar.get_height() / 2),
                 xytext=(4, 0),
                 textcoords="offset points",
