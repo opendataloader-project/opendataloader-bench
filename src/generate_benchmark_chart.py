@@ -369,6 +369,19 @@ def generate_charts(prediction_root: Path, output_path: Path) -> Path:
         output_path.parent / f"{stem}_quality{suffix}",
     )
 
+    # --- Composite: Overall | Speed ---
+    fig_h = max(5, num_engines * 0.75 + 2.5)
+    fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(16, fig_h), constrained_layout=True)
+    _plot_single_metric(ax_left, engines, overall_values, "Extraction Accuracy")
+    _plot_time_metric(ax_right, engines, elapsed_values)
+    ax_right.set_title("Extraction Time Per Page", fontsize=14)
+    fig.get_layout_engine().set(rect=(0, 0, 1, 0.91))
+    fig.suptitle("PDF Document Structure Benchmark", fontsize=24, y=0.998)
+    fig.text(0.5, 0.955, "200 pages \u00b7 Apple M4 \u00b7 32GB", ha="center", va="top", fontsize=15, color="gray", transform=fig.transFigure)
+    fig.savefig(output_path, dpi=200)
+    plt.close(fig)
+    logging.info("Saved composite chart to %s", output_path)
+
     logging.info("Saved benchmark charts")
 
     # Individual metric charts
