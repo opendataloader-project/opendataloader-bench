@@ -25,6 +25,7 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 | marker                      | 0.86     | 0.89          | 0.81     | 0.80     | 53.93          | GPL-3.0     |
 | **opendataloader**          | 0.84     | 0.91          | 0.49     | 0.74     | 0.05           | Apache-2.0  |
 | edgeparse                   | 0.84     | 0.89          | 0.72     | 0.71     | **0.04**       | Apache-2.0  |
+| unstructured [hi_res]       | 0.84     | 0.90          | 0.59     | 0.75     | 3.01           | Apache-2.0  |
 | mineru                      | 0.83     | 0.86          | 0.87     | 0.74     | 5.96           | AGPL-3.0    |
 | pymupdf4llm                 | 0.73     | 0.89          | 0.40     | 0.41     | 0.09           | AGPL-3.0    |
 | unstructured                | 0.69     | 0.88          | 0.00     | 0.39     | 0.08           | Apache-2.0  |
@@ -46,6 +47,7 @@ Detailed JSON outputs live alongside each engine and capture the exact metric va
 - [prediction/mineru/evaluation.json](prediction/mineru/evaluation.json)
 - [prediction/pymupdf4llm/evaluation.json](prediction/pymupdf4llm/evaluation.json)
 - [prediction/markitdown/evaluation.json](prediction/markitdown/evaluation.json)
+- [prediction/unstructured-hires/evaluation.json](prediction/unstructured-hires/evaluation.json)
 
 ## 3. Metrics
 

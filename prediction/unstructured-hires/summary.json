@@ -1,0 +1,9 @@
+{
+    "engine_name": "unstructured-hires",
+    "engine_version": "0.17.2",
+    "processor": "Apple M4",
+    "document_count": 200,
+    "total_elapsed": 601.6154181957245,
+    "elapsed_per_doc": 3.0080770909786225,
+    "date": "2026-04-06"
+}
