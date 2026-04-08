@@ -12,7 +12,7 @@ ENGINES: Dict[str, str] = {
     "opendataloader": "2.2.1",
     "opendataloader-hybrid": "2.2.1",
     "opendataloader-hybrid-docling-fast": "2.2.1",
-    "opendataloader-hybrid-hancom": "2.2.1",
+    "opendataloader-hybrid-hydrogen": "2.2.1",
     "docling": "2.84.0",
     "markitdown": "0.1.5",
     "unstructured": "0.17.2",
@@ -30,15 +30,23 @@ DATA_ONLY_ENGINES: Dict[str, str] = {
     "pymupdf4llm": "0.0.17",
 }
 
+# Engines excluded from chart display (internal/experimental).
+_CHART_EXCLUDED: set = {
+    "opendataloader-hybrid-hydrogen",
+}
+
 # All engines whose evaluation data should appear in charts.
-ALL_CHART_ENGINES: Dict[str, str] = {**ENGINES, **DATA_ONLY_ENGINES}
+ALL_CHART_ENGINES: Dict[str, str] = {
+    k: v for k, v in {**ENGINES, **DATA_ONLY_ENGINES}.items()
+    if k not in _CHART_EXCLUDED
+}
 
 # Maps engine name → Python module name for lazy import.
 _ENGINE_MODULES: Dict[str, str] = {
     "opendataloader": "pdf_parser_opendataloader",
     "opendataloader-hybrid": "pdf_parser_opendataloader_hybrid",
     "opendataloader-hybrid-docling-fast": "pdf_parser_opendataloader_hybrid_docling_fast",
-    "opendataloader-hybrid-hancom": "pdf_parser_opendataloader_hybrid_hancom",
+    "opendataloader-hybrid-hydrogen": "pdf_parser_opendataloader_hybrid_hydrogen",
     "docling": "pdf_parser_docling",
     "markitdown": "pdf_parser_markitdown",
     "unstructured": "pdf_parser_unstructured",

@@ -1,0 +1,9 @@
+{
+    "engine_name": "opendataloader-hybrid-hydrogen",
+    "engine_version": "2.2.1",
+    "processor": "Apple M4",
+    "document_count": 200,
+    "total_elapsed": 1013.583931684494,
+    "elapsed_per_doc": 5.06791965842247,
+    "date": "2026-04-08"
+}
