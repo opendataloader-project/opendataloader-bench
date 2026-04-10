@@ -114,7 +114,7 @@ Want to run this benchmark yourself or add a new engine? Follow the steps below.
 
 1. **Clone and set up Git LFS**:
    ```sh
-   git clone https://github.com/anthropics/opendataloader-bench.git
+   git clone https://github.com/opendataloader-project/opendataloader-bench
    cd opendataloader-bench
    git lfs install
    git lfs pull
