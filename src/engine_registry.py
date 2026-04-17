@@ -12,7 +12,6 @@ ENGINES: Dict[str, str] = {
     "opendataloader": "2.2.1",
     "opendataloader-hybrid": "2.2.1",
     "opendataloader-hybrid-docling-fast": "2.2.1",
-    "opendataloader-hybrid-hydrogen": "2.2.1",
     "docling": "2.84.0",
     "markitdown": "0.1.5",
     "unstructured": "0.17.2",
@@ -28,11 +27,14 @@ DATA_ONLY_ENGINES: Dict[str, str] = {
     "marker": "1.6.2",
     "mineru": "1.3.3",
     "pymupdf4llm": "0.0.17",
+    "opendataloader-hybrid-hydrogen": "2.2.1",
+    "opendataloader-hybrid-helium": "0.2.0",
 }
 
 # Engines excluded from chart display (internal/experimental).
 _CHART_EXCLUDED: set = {
     "opendataloader-hybrid-hydrogen",
+    "opendataloader-hybrid-helium",
 }
 
 # All engines whose evaluation data should appear in charts.
@@ -46,7 +48,6 @@ _ENGINE_MODULES: Dict[str, str] = {
     "opendataloader": "pdf_parser_opendataloader",
     "opendataloader-hybrid": "pdf_parser_opendataloader_hybrid",
     "opendataloader-hybrid-docling-fast": "pdf_parser_opendataloader_hybrid_docling_fast",
-    "opendataloader-hybrid-hydrogen": "pdf_parser_opendataloader_hybrid_hydrogen",
     "docling": "pdf_parser_docling",
     "markitdown": "pdf_parser_markitdown",
     "unstructured": "pdf_parser_unstructured",

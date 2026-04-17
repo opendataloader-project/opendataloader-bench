@@ -1,0 +1,15 @@
+{
+    "engine_name": "opendataloader-hybrid-helium",
+    "engine_version": "0.2.0-SNAPSHOT",
+    "processor": "Apple M4",
+    "document_count": 200,
+    "total_elapsed": 1724.0,
+    "elapsed_per_doc": 8.62,
+    "date": "2026-04-17",
+    "options": {
+        "hybrid_mode": "full",
+        "ocr": "auto",
+        "regionlist_strategy": "table-first",
+        "image_cache": "memory"
+    }
+}
