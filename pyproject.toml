@@ -3,7 +3,7 @@ name = "opendataloader-bench"
 version = "0.1.0"
 description = "Benchmark for PDF document structure and layout analysis engines"
 readme = "README.md"
-license = "MIT"
+license = "Apache-2.0"
 requires-python = ">=3.13"
 dependencies = [
     "apted>=1.0.3",
