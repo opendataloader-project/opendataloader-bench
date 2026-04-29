@@ -28,3 +28,11 @@ licensed under their respective open source licenses. For details, see:
 
     THIRD_PARTY_LICENSES.txt
     THIRD_PARTY_NOTICES.md
+
+
+HISTORICAL NOTE
+
+Versions of OpenDataLoader Benchmark prior to this release were licensed
+under the MIT License. From this release onwards, the project is licensed
+under the Apache License 2.0 to align with the rest of the
+opendataloader-project family.
