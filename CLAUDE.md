@@ -62,8 +62,7 @@ Uses **lazy imports** via `get_engine_handler()`. Engines not installed are grac
 
 ### License Tiers
 - **Safe** (direct import): opendataloader, docling, markitdown, unstructured, edgeparse
-- **Data-only** (no code, prediction/ results only): marker (GPL), MinerU (AGPL), PyMuPDF (AGPL)
-- **CLI only** (not in deps): nutrient/PSPDFKit (Proprietary)
+- **Data-only** (no code, prediction/ results only): marker (GPL), MinerU (AGPL), PyMuPDF (AGPL), nutrient/PSPDFKit (Commercial)
 
 ### Directory Structure
 - `pdfs/` — Input PDF corpus (200 documents)

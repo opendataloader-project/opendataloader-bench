@@ -21,7 +21,7 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 |-----------------------------|-----------|---------------|---------|---------|----------------|-------------|
 | **opendataloader [hybrid]** | **0.907** | **0.934**     | **0.928** | 0.821   | 0.463          | Apache-2.0  |
 | docling                     | 0.882     | 0.898         | 0.887   | **0.824** | 0.762          | MIT         |
-| nutrient                    | 0.880     | 0.924         | 0.662   | 0.811   | 0.230          | Proprietary |
+| nutrient                    | 0.885     | 0.925         | 0.708   | 0.819   | 0.008          | Commercial  |
 | marker                      | 0.861     | 0.890         | 0.808   | 0.796   | 53.932         | GPL-3.0     |
 | unstructured [hi_res]       | 0.841     | 0.904         | 0.588   | 0.749   | 3.008          | Apache-2.0  |
 | edgeparse                   | 0.837     | 0.894         | 0.717   | 0.706   | 0.036          | Apache-2.0  |
@@ -136,11 +136,9 @@ Want to run this benchmark yourself or add a new engine? Follow the steps below.
    uv sync --extra all-safe
    ```
 
-   AGPL/GPL engines (marker, MinerU, PyMuPDF) are not bundled as dependencies — install them separately and the benchmark invokes them via subprocess.
+   AGPL/GPL engines (marker, MinerU, PyMuPDF) and commercial engines (nutrient) are not runnable from this repo — their parser code has been removed to avoid license/commercial-tier entanglement. Their `prediction/` results are preserved so the comparison charts still display them.
 
    > Don't have uv? See [installation guide](https://docs.astral.sh/uv/getting-started/installation/)
-
-   > **nutrient** is installed separately via npm: `npm install -g @pspdfkit/pdf-to-markdown`
 
 ### Running the Benchmark
 

@@ -17,16 +17,17 @@ ENGINES: Dict[str, str] = {
     "unstructured": "0.17.2",
     "unstructured-hires": "0.17.2",
     "edgeparse": "0.3.0",
-    "nutrient": "1.0.1",
     "liteparse": "1.2.1",
 }
 
 # Data-only engines — no parser code, but prediction/ results are preserved
-# for chart display. AGPL/GPL licensed; code removed to avoid license contamination.
+# for chart display. Code removed to avoid license/commercial-tier entanglement
+# (AGPL/GPL/commercial).
 DATA_ONLY_ENGINES: Dict[str, str] = {
     "marker": "1.6.2",
     "mineru": "1.3.3",
     "pymupdf4llm": "0.0.17",
+    "nutrient": "1.0.1",
     "opendataloader-hybrid-hydrogen": "2.2.1",
     "opendataloader-hybrid-helium": "0.2.0",
 }
@@ -53,7 +54,6 @@ _ENGINE_MODULES: Dict[str, str] = {
     "unstructured": "pdf_parser_unstructured",
     "unstructured-hires": "pdf_parser_unstructured_hires",
     "edgeparse": "pdf_parser_edgeparse",
-    "nutrient": "pdf_parser_nutrient",
     "liteparse": "pdf_parser_liteparse",
 }
 
