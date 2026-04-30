@@ -9,7 +9,7 @@ dependencies = [
     "apted>=1.0.3",
     "beautifulsoup4>=4.14.3",
     "easyocr>=1.7.2",
-    "lxml>=6.0.2",
+    "lxml>=6.1.0",
     "matplotlib>=3.10.8",
     "pdf2image>=1.17.0",
     "py-cpuinfo>=9.0.0",
@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=9.0.2"]
+dev = ["pytest>=9.0.3"]
 # Engine groups (install individually or combine)
 opendataloader = ["opendataloader-pdf[hybrid]>=2.2.1"]
 docling = ["docling>=2.84.0"]
@@ -30,7 +30,7 @@ all-safe = [
     "docling>=2.84.0",
     "markitdown[pdf]>=0.1.5",
     "edgeparse",
-    "pypdf",
+    "pypdf>=6.10.2",
 ]
 
 [build-system]
@@ -42,3 +42,9 @@ packages = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.uv]
+constraint-dependencies = [
+    "cryptography>=46.0.7",
+    "python-multipart>=0.0.26",
+]
