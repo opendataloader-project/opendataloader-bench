@@ -1,9 +1,9 @@
 {
     "engine_name": "nutrient",
-    "engine_version": "1.0.0",
+    "engine_version": "1.0.1",
     "processor": "Apple M4",
     "document_count": 200,
-    "total_elapsed": 45.976003885269165,
-    "elapsed_per_doc": 0.22988001942634584,
-    "date": "2026-04-06"
+    "total_elapsed": 1.6676139831542969,
+    "elapsed_per_doc": 0.008338069915771485,
+    "date": "2026-04-30"
 }

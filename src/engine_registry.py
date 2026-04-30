@@ -17,7 +17,7 @@ ENGINES: Dict[str, str] = {
     "unstructured": "0.17.2",
     "unstructured-hires": "0.17.2",
     "edgeparse": "0.3.0",
-    "nutrient": "1.0.0",
+    "nutrient": "1.0.1",
     "liteparse": "1.2.1",
 }
 
