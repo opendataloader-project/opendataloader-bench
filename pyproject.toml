@@ -20,14 +20,14 @@ dependencies = [
 dev = ["pytest>=9.0.3"]
 # Engine groups (install individually or combine)
 opendataloader = ["opendataloader-pdf[hybrid]>=2.2.1"]
-docling = ["docling>=2.84.0"]
+docling = ["docling>=2.91.0"]
 markitdown = ["markitdown[pdf]>=0.1.5"]
 edgeparse = ["edgeparse"]
 liteparse = ["liteparse"]
 # Convenience groups
 all-safe = [
     "opendataloader-pdf[hybrid]>=2.2.1",
-    "docling>=2.84.0",
+    "docling>=2.91.0",
     "markitdown[pdf]>=0.1.5",
     "edgeparse",
     "pypdf>=6.10.2",
