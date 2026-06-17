@@ -46,5 +46,5 @@ testpaths = ["tests"]
 [tool.uv]
 constraint-dependencies = [
     "cryptography>=46.0.7",
-    "python-multipart>=0.0.26",
+    "python-multipart>=0.0.31",
 ]
