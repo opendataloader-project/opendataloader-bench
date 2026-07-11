@@ -28,6 +28,7 @@ from evaluator_table import evaluate_table
 
 
 DEFAULT_GT_DIR = "ground-truth/markdown"
+DEFAULT_REFERENCE_PATH = "ground-truth/reference.json"
 DEFAULT_PREDICTION_ROOT = "prediction"
 DEFAULT_OUTPUT_FILENAME = "evaluation.json"
 

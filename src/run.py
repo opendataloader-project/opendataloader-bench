@@ -14,6 +14,7 @@ from evaluator import (
     DEFAULT_GT_DIR,
     DEFAULT_OUTPUT_FILENAME,
     DEFAULT_PREDICTION_ROOT,
+    DEFAULT_REFERENCE_PATH,
     run as evaluate_run,
 )
 from engine_registry import ENGINES
@@ -27,6 +28,16 @@ def _resolve_path(value: str, project_root: Path) -> Path:
 
     path = Path(value)
     return path if path.is_absolute() else project_root / path
+
+
+def resolve_reference_path(args: argparse.Namespace, project_root: Path) -> Path:
+    """Resolve the ground-truth ``reference.json`` path.
+
+    Kept independent of ``--ground-truth-dir`` (which points at the GT *markdown*
+    directory) so that table-detection and triage evaluation always locate
+    reference.json instead of looking for it under the markdown subdirectory.
+    """
+    return _resolve_path(args.reference_path, project_root)
 
 
 def _select_engine(requested: Optional[str]) -> List[str]:
@@ -224,7 +235,7 @@ def run_pipeline(args: argparse.Namespace) -> Optional[dict]:
         eval_data = json.load(f)
 
     # Table detection evaluation
-    reference_path = ground_truth_dir / "reference.json"
+    reference_path = resolve_reference_path(args, project_root)
     if reference_path.exists():
         from evaluator_table_detection import evaluate_table_detection_batch
 
@@ -317,6 +328,12 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
         "--ground-truth-dir",
         default=DEFAULT_GT_DIR,
         help="Directory that stores ground-truth markdown files.",
+    )
+    parser.add_argument(
+        "--reference-path",
+        default=DEFAULT_REFERENCE_PATH,
+        help="Path to ground-truth reference.json used for table-detection and "
+             "triage evaluation (defaults to ground-truth/reference.json).",
     )
     parser.add_argument(
         "--prediction-root",
