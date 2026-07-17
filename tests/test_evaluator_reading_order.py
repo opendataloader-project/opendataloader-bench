@@ -73,3 +73,25 @@ def test_very_different_length():
     nid, nid_s = evaluate_reading_order(gt, pred)
     assert nid < 0.3
     assert nid_s < 0.3
+
+
+def test_markdown_emphasis_is_ignored():
+    gt = "Definition 1. A universe U is a chain of states"
+    pred = "**Definition 1.** A *universe U* is a chain of states"
+    nid, nid_s = evaluate_reading_order(gt, pred)
+    assert nid == approx(1.0)
+    assert nid_s == approx(1.0)
+
+
+def test_nested_emphasis_is_ignored():
+    gt = "both bold and italic plus struck text"
+    pred = "***both bold and italic*** plus ~~struck~~ text"
+    nid, _ = evaluate_reading_order(gt, pred)
+    assert nid == approx(1.0)
+
+
+def test_bare_asterisks_are_preserved():
+    gt = "2 * 3 * 4 = 24"
+    pred = "2 * 3 * 4 = 24"
+    nid, _ = evaluate_reading_order(gt, pred)
+    assert nid == approx(1.0)
