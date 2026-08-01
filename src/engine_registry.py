@@ -17,7 +17,7 @@ ENGINES: Dict[str, str] = {
     "unstructured": "0.17.2",
     "unstructured-hires": "0.17.2",
     "edgeparse": "0.3.0",
-    "liteparse": "2.1.0",
+    "liteparse": "2.10.1",
 }
 
 # Data-only engines — no parser code, but prediction/ results are preserved
