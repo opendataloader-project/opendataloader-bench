@@ -23,7 +23,7 @@ opendataloader = ["opendataloader-pdf[hybrid]>=2.2.1"]
 docling = ["docling>=2.84.0"]
 markitdown = ["markitdown[pdf]>=0.1.5"]
 edgeparse = ["edgeparse"]
-liteparse = ["liteparse"]
+liteparse = ["liteparse>=2.1.0"]
 # Convenience groups
 all-safe = [
     "opendataloader-pdf[hybrid]>=2.2.1",
