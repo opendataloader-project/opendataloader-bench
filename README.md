@@ -19,9 +19,10 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 | Engine                      | Overall   | Reading Order | Table     | Heading   | Speed (s/page) | License     |
 |-----------------------------|-----------|---------------|-----------|-----------|----------------|-------------|
-| **opendataloader [hybrid]** | **0.907** | **0.934**     | **0.928** | 0.821     | 0.463          | Apache-2.0  |
+| folio                       | **0.924** | **0.947**     | 0.894     | **0.879** | 0.039          | Apache-2.0  |
+| **opendataloader [hybrid]** | 0.907     | 0.934         | **0.928** | 0.821     | 0.463          | Apache-2.0  |
 | nutrient                    | 0.885     | 0.925         | 0.708     | 0.819     | **0.008**      | Commercial  |
-| docling                     | 0.882     | 0.898         | 0.887     | **0.824** | 0.762          | MIT         |
+| docling                     | 0.882     | 0.898         | 0.887     | 0.824     | 0.762          | MIT         |
 | marker                      | 0.861     | 0.890         | 0.808     | 0.796     | 53.932         | GPL-3.0     |
 | unstructured [hi_res]       | 0.841     | 0.904         | 0.588     | 0.749     | 3.008          | Apache-2.0  |
 | edgeparse                   | 0.837     | 0.894         | 0.717     | 0.706     | 0.036          | Apache-2.0  |
@@ -54,6 +55,7 @@ Detailed JSON outputs live alongside each engine and capture the exact metric va
 - [prediction/unstructured-hires/evaluation.json](prediction/unstructured-hires/evaluation.json)
 - [prediction/markitdown/evaluation.json](prediction/markitdown/evaluation.json)
 - [prediction/liteparse/evaluation.json](prediction/liteparse/evaluation.json)
+- [prediction/folio/evaluation.json](prediction/folio/evaluation.json)
 
 ## 3. Metrics
 
@@ -131,6 +133,7 @@ Want to run this benchmark yourself or add a new engine? Follow the steps below.
    uv sync --extra opendataloader
    uv sync --extra docling
    uv sync --extra markitdown
+   uv sync --extra folio        # installed from GitHub (not on PyPI)
 
    # All permissively-licensed engines at once
    uv sync --extra all-safe
