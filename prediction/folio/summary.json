@@ -1,0 +1,9 @@
+{
+    "engine_name": "folio",
+    "engine_version": "0.11.7",
+    "processor": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "document_count": 200,
+    "total_elapsed": 7.746802568435669,
+    "elapsed_per_doc": 0.038734012842178346,
+    "date": "2026-09-22"
+}

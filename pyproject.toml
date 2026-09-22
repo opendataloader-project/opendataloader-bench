@@ -24,6 +24,7 @@ docling = ["docling>=2.84.0"]
 markitdown = ["markitdown[pdf]>=0.1.5"]
 edgeparse = ["edgeparse"]
 liteparse = ["liteparse"]
+folio = ["foliopdf @ git+https://github.com/KenWuqianghao/folio"]
 # Convenience groups
 all-safe = [
     "opendataloader-pdf[hybrid]>=2.2.1",
@@ -39,6 +40,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
+
+# foliopdf is installed from GitHub (not on PyPI); hatchling needs this for the URL reference.
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

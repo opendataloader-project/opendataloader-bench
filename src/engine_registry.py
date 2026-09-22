@@ -18,6 +18,7 @@ ENGINES: Dict[str, str] = {
     "unstructured-hires": "0.17.2",
     "edgeparse": "0.3.0",
     "liteparse": "1.2.1",
+    "folio": "0.11.7",
 }
 
 # Data-only engines — no parser code, but prediction/ results are preserved
@@ -55,6 +56,7 @@ _ENGINE_MODULES: Dict[str, str] = {
     "unstructured-hires": "pdf_parser_unstructured_hires",
     "edgeparse": "pdf_parser_edgeparse",
     "liteparse": "pdf_parser_liteparse",
+    "folio": "pdf_parser_folio",
 }
 
 
