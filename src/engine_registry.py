@@ -30,6 +30,8 @@ DATA_ONLY_ENGINES: Dict[str, str] = {
     "nutrient": "1.0.1",
     "opendataloader-hybrid-hydrogen": "2.2.1",
     "opendataloader-hybrid-helium": "0.2.0",
+    "lm-kit": "2026.9.8",
+    "lm-kit-ocr": "2026.9.8",
 }
 
 # Engines excluded from chart display (internal/experimental).
