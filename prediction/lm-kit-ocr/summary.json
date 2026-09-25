@@ -1,0 +1,9 @@
+{
+    "engine_name": "lm-kit-ocr",
+    "engine_version": "2026.9.8",
+    "processor": "Apple M4 Max",
+    "document_count": 200,
+    "total_elapsed": 4.853677034378052,
+    "elapsed_per_doc": 0.02426838517189026,
+    "date": "2026-09-25"
+}

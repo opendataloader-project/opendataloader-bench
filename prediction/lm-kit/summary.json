@@ -1,0 +1,9 @@
+{
+    "engine_name": "lm-kit",
+    "engine_version": "2026.9.8",
+    "processor": "Apple M4 Max",
+    "document_count": 200,
+    "total_elapsed": 0.8263869285583496,
+    "elapsed_per_doc": 0.004131934642791748,
+    "date": "2026-09-25"
+}
