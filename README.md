@@ -19,8 +19,10 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 | Engine                      | Overall   | Reading Order | Table     | Heading   | Speed (s/page) | License     |
 |-----------------------------|-----------|---------------|-----------|-----------|----------------|-------------|
-| **kordoc [ocr]**            | **0.952** | **0.955**     | **0.974** | **0.934** | 0.768          | MIT         |
-| kordoc                      | 0.935     | 0.938         | 0.931     | 0.926     | 0.171          | MIT         |
+| **kordoc [plain, ocr]**     | **0.971** | **0.975**     | **0.983** | **0.958** | 0.458          | MIT         |
+| kordoc [ocr]                | 0.960     | 0.960         | 0.979     | 0.949     | 0.447          | MIT         |
+| kordoc [plain]              | 0.949     | 0.954         | 0.940     | 0.943     | 0.032          | MIT         |
+| kordoc                      | 0.937     | 0.938         | 0.936     | 0.933     | 0.035          | MIT         |
 | opendataloader [hybrid]     | 0.907     | 0.934         | 0.928     | 0.821     | 0.463          | Apache-2.0  |
 | nutrient                    | 0.885     | 0.925         | 0.708     | 0.819     | **0.008**      | Commercial  |
 | docling                     | 0.882     | 0.898         | 0.887     | 0.824     | 0.762          | MIT         |
@@ -35,6 +37,7 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 | liteparse                   | 0.576     | 0.866         | 0.000     | 0.000     | 1.061          | Apache-2.0  |
 
 > Scores are normalized to [0, 1]. Higher is better for accuracy metrics; lower is better for speed. **Bold** indicates best performance.
+> kordoc [plain] = `plain: true, htmlTables: true` (no image placeholders or link URLs, every table as indented HTML); [ocr] = `ocr: true`.
 
 ### Visual Comparison
 
@@ -58,6 +61,8 @@ Detailed JSON outputs live alongside each engine and capture the exact metric va
 - [prediction/liteparse/evaluation.json](prediction/liteparse/evaluation.json)
 - [prediction/kordoc/evaluation.json](prediction/kordoc/evaluation.json)
 - [prediction/kordoc-ocr/evaluation.json](prediction/kordoc-ocr/evaluation.json)
+- [prediction/kordoc-plain/evaluation.json](prediction/kordoc-plain/evaluation.json)
+- [prediction/kordoc-plain-ocr/evaluation.json](prediction/kordoc-plain-ocr/evaluation.json)
 
 ## 3. Metrics
 
