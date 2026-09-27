@@ -1,0 +1,9 @@
+{
+    "engine_name": "kordoc-ocr",
+    "engine_version": "4.15.6",
+    "processor": "Apple M5",
+    "document_count": 200,
+    "total_elapsed": 153.64235377311707,
+    "elapsed_per_doc": 0.7682117688655853,
+    "date": "2026-09-27"
+}

@@ -19,9 +19,11 @@ The evaluation pipeline is modular—add new engines, corpora, or metrics with m
 
 | Engine                      | Overall   | Reading Order | Table     | Heading   | Speed (s/page) | License     |
 |-----------------------------|-----------|---------------|-----------|-----------|----------------|-------------|
-| **opendataloader [hybrid]** | **0.907** | **0.934**     | **0.928** | 0.821     | 0.463          | Apache-2.0  |
+| **kordoc [ocr]**            | **0.952** | **0.955**     | **0.974** | **0.934** | 0.768          | MIT         |
+| kordoc                      | 0.935     | 0.938         | 0.931     | 0.926     | 0.171          | MIT         |
+| opendataloader [hybrid]     | 0.907     | 0.934         | 0.928     | 0.821     | 0.463          | Apache-2.0  |
 | nutrient                    | 0.885     | 0.925         | 0.708     | 0.819     | **0.008**      | Commercial  |
-| docling                     | 0.882     | 0.898         | 0.887     | **0.824** | 0.762          | MIT         |
+| docling                     | 0.882     | 0.898         | 0.887     | 0.824     | 0.762          | MIT         |
 | marker                      | 0.861     | 0.890         | 0.808     | 0.796     | 53.932         | GPL-3.0     |
 | unstructured [hi_res]       | 0.841     | 0.904         | 0.588     | 0.749     | 3.008          | Apache-2.0  |
 | edgeparse                   | 0.837     | 0.894         | 0.717     | 0.706     | 0.036          | Apache-2.0  |
@@ -54,6 +56,8 @@ Detailed JSON outputs live alongside each engine and capture the exact metric va
 - [prediction/unstructured-hires/evaluation.json](prediction/unstructured-hires/evaluation.json)
 - [prediction/markitdown/evaluation.json](prediction/markitdown/evaluation.json)
 - [prediction/liteparse/evaluation.json](prediction/liteparse/evaluation.json)
+- [prediction/kordoc/evaluation.json](prediction/kordoc/evaluation.json)
+- [prediction/kordoc-ocr/evaluation.json](prediction/kordoc-ocr/evaluation.json)
 
 ## 3. Metrics
 
@@ -136,7 +140,7 @@ Want to run this benchmark yourself or add a new engine? Follow the steps below.
    uv sync --extra all-safe
    ```
 
-   AGPL/GPL engines (marker, MinerU, PyMuPDF) and commercial engines (nutrient) are not runnable from this repo — their parser code has been removed to avoid license/commercial-tier entanglement. Their `prediction/` results are preserved so the comparison charts still display them.
+   AGPL/GPL engines (marker, MinerU, PyMuPDF) and commercial engines (nutrient) are not runnable from this repo — their parser code has been removed to avoid license/commercial-tier entanglement. Their `prediction/` results are preserved so the comparison charts still display them. kordoc (MIT) is a Node.js library that can't be installed through uv, so its `prediction/` results are included the same way.
 
    > Don't have uv? See [installation guide](https://docs.astral.sh/uv/getting-started/installation/)
 
