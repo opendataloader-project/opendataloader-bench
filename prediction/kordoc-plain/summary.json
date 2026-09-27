@@ -1,0 +1,9 @@
+{
+    "engine_name": "kordoc-plain",
+    "engine_version": "4.15.7",
+    "processor": "Apple M5",
+    "document_count": 200,
+    "total_elapsed": 6.389937162399292,
+    "elapsed_per_doc": 0.03194968581199646,
+    "date": "2026-09-28"
+}
