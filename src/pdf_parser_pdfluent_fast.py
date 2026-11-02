@@ -13,10 +13,6 @@ import pdfluent
 def to_markdown(doc_paths, input_path, output_dir):
     for doc_path in doc_paths:
         base_name = os.path.splitext(os.path.basename(doc_path))[0]
-        try:
-            markdown = pdfluent.open(str(doc_path)).extract_markdown(quality="fast", keep_furniture=True)
-        except Exception as exc:
-            print(f"FAILED {base_name}: {exc}")
-            markdown = ""
+        markdown = pdfluent.open(str(doc_path)).extract_markdown(quality="fast", keep_furniture=True)
         with open(os.path.join(output_dir, f"{base_name}.md"), "w", encoding="utf-8") as f:
             f.write(markdown)
