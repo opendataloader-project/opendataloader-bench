@@ -18,6 +18,8 @@ ENGINES: Dict[str, str] = {
     "unstructured-hires": "0.17.2",
     "edgeparse": "0.3.0",
     "liteparse": "1.2.1",
+    "pdfluent-auto": "1.3.0",
+    "pdfluent-fast": "1.3.0",
 }
 
 # Data-only engines — no parser code, but prediction/ results are preserved
@@ -55,6 +57,8 @@ _ENGINE_MODULES: Dict[str, str] = {
     "unstructured-hires": "pdf_parser_unstructured_hires",
     "edgeparse": "pdf_parser_edgeparse",
     "liteparse": "pdf_parser_liteparse",
+    "pdfluent-auto": "pdf_parser_pdfluent_auto",
+    "pdfluent-fast": "pdf_parser_pdfluent_fast",
 }
 
 

@@ -1664,6 +1664,9 @@ markitdown = [
 opendataloader = [
     { name = "opendataloader-pdf", extra = ["hybrid"] },
 ]
+pdfluent = [
+    { name = "pdfluent" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -1682,12 +1685,13 @@ requires-dist = [
     { name = "opendataloader-pdf", extras = ["hybrid"], marker = "extra == 'all-safe'", specifier = ">=2.2.1" },
     { name = "opendataloader-pdf", extras = ["hybrid"], marker = "extra == 'opendataloader'", specifier = ">=2.2.1" },
     { name = "pdf2image", specifier = ">=1.17.0" },
+    { name = "pdfluent", marker = "extra == 'pdfluent'", specifier = "==1.3.0" },
     { name = "py-cpuinfo", specifier = ">=9.0.0" },
     { name = "pypdf", marker = "extra == 'all-safe'", specifier = ">=6.10.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.3" },
     { name = "rapidfuzz", specifier = ">=3.14.3" },
 ]
-provides-extras = ["dev", "opendataloader", "docling", "markitdown", "edgeparse", "liteparse", "all-safe"]
+provides-extras = ["dev", "opendataloader", "docling", "markitdown", "edgeparse", "liteparse", "pdfluent", "all-safe"]
 
 [[package]]
 name = "opendataloader-pdf"
@@ -1780,6 +1784,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/00/d8/b280f01045555dc257b8153c00dee3bc75830f91a744cd5f84ef3a0a64b1/pdf2image-1.17.0.tar.gz", hash = "sha256:eaa959bc116b420dd7ec415fcae49b98100dda3dd18cd2fdfa86d09f112f6d57", size = 12811, upload-time = "2024-01-07T20:33:01.965Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/62/33/61766ae033518957f877ab246f87ca30a85b778ebaad65b7f74fa7e52988/pdf2image-1.17.0-py3-none-any.whl", hash = "sha256:ecdd58d7afb810dffe21ef2b1bbc057ef434dabbac6c33778a38a3f7744a27e2", size = 11618, upload-time = "2024-01-07T20:32:59.957Z" },
+]
+
+[[package]]
+name = "pdfluent"
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/42/ce/a807d2bbbfaa9355d2c94ba1e05ea92bca5c1f0b138af51f11e89759d3e5/pdfluent-1.3.0.tar.gz", hash = "sha256:af3e26d08137f26067f9bd57f5845904806f568bc15d9db4e72e63c79fca6d18", size = 15275240, upload-time = "2026-11-02T18:47:14.975Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b2/8f/190077791cea2f370c04ccd0ee1f34368b6bc5565b5f6ae7382500c235b7/pdfluent-1.3.0-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:c57ebeab6fc3ce2d73305f982c8f96db7770d058ea4406d8984625eb63b2ef56", size = 19088326, upload-time = "2026-11-02T18:46:52.782Z" },
+    { url = "https://files.pythonhosted.org/packages/1f/0b/321f7e0c1e054378d78c5afd87e6abaf9e93510a57ac9dcd23c74385e70d/pdfluent-1.3.0-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:8a0c3d80613e5c287fb037b641d6c9bc49ad82e8c5e5b221bd7ba1e9996a851a", size = 18080403, upload-time = "2026-11-02T18:46:56.339Z" },
+    { url = "https://files.pythonhosted.org/packages/99/44/1b5cbb26899fac5088a37a3537b02b9884df1f420ab9448197939bbf7770/pdfluent-1.3.0-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8746f13b16ed68f1ca675e85232b353d4be5b58535eba2bf64359eadae216fa4", size = 18370994, upload-time = "2026-11-02T18:46:59.371Z" },
+    { url = "https://files.pythonhosted.org/packages/4a/59/4b91b8dd4df8d7b799cbb668b964fb9f29bb223cc0e85f4a734c3c004ac6/pdfluent-1.3.0-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:082cb246209a6a749855687ad111bb26fd0737430c66419f06b4cc788cb98fd4", size = 20173717, upload-time = "2026-11-02T18:47:03.013Z" },
+    { url = "https://files.pythonhosted.org/packages/0f/ab/8a2c5296e5cf6aa38586ad5d07437ec78f64e390e7a228b559ea4d690f57/pdfluent-1.3.0-cp38-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:7afbef01f92b7517d0dc22595878ca897967824248387438171f5be7b034148e", size = 18372931, upload-time = "2026-11-02T18:47:06.299Z" },
+    { url = "https://files.pythonhosted.org/packages/0a/de/6ff1a77e94fdf6c8fed2259b7c87344ab27ae16ff3c5479e1a03c7232f25/pdfluent-1.3.0-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:8ecf64434ec4c961174588a97cbdd4eb722f9efa4ea8f4f80bcda3a43b3b14cf", size = 20170604, upload-time = "2026-11-02T18:47:09.287Z" },
+    { url = "https://files.pythonhosted.org/packages/d2/aa/d2c3ad53d69e59bce3e923581ca3e5234901bb013e8e38f41b4d76f2f375/pdfluent-1.3.0-cp38-abi3-win_amd64.whl", hash = "sha256:9ccd2827f6fdd50f6ae9ee28d84fa04d05429a22dee003ab1cc9337dd25efbcc", size = 19607940, upload-time = "2026-11-02T18:47:12.283Z" },
 ]
 
 [[package]]
