@@ -1,0 +1,9 @@
+{
+    "engine_name": "rayopdf-plain",
+    "engine_version": "0.5.0",
+    "processor": "AMD Ryzen 5 PRO 4650GE with Radeon Graphics",
+    "document_count": 200,
+    "total_elapsed": 0.06725955009460449,
+    "elapsed_per_doc": 0.0003362977504730225,
+    "date": "2026-11-25"
+}

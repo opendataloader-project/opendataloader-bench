@@ -30,6 +30,8 @@ DATA_ONLY_ENGINES: Dict[str, str] = {
     "nutrient": "1.0.1",
     "opendataloader-hybrid-hydrogen": "2.2.1",
     "opendataloader-hybrid-helium": "0.2.0",
+    "rayopdf": "0.5.0",
+    "rayopdf-plain": "0.5.0",
 }
 
 # Engines excluded from chart display (internal/experimental).
